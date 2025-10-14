@@ -178,6 +178,7 @@ public:
         uint32 map;
         Difficulty minDifficulty;
         uint32 finalBossEntry;
+        std::string dungeonName;
     };
 
     struct SpellOverride

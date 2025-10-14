@@ -285,7 +285,7 @@ void MythicPlus::LoadMythicPlusCapableDungeonsFromDB()
 {
     mythicPlusDungeons.clear();
 
-    QueryResult result = WorldDatabase.Query("SELECT map, mapdifficulty, final_boss_entry FROM mythic_plus_capable_dungeon");
+    QueryResult result = WorldDatabase.Query("SELECT map, mapdifficulty, final_boss_entry, dungeon_name FROM mythic_plus_capable_dungeon");
     if (!result)
         return;
 
@@ -301,11 +301,13 @@ void MythicPlus::LoadMythicPlusCapableDungeonsFromDB()
             continue;
         }
         uint32 finalBossEntry = fields[2].Get<uint32>();
+        std::string dungeonName = fields[3].Get<std::string>();
 
         MythicPlusCapableDungeon dungeon;
         dungeon.map = mapId;
         dungeon.minDifficulty = (Difficulty)diff;
         dungeon.finalBossEntry = finalBossEntry;
+        dungeon.dungeonName = dungeonName;
 
         mythicPlusDungeons[mapId] = dungeon;
     } while (result->NextRow());

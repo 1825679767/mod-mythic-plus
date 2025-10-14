@@ -235,14 +235,26 @@ void MythicPlusNpcSupport::AddMythicPlusDungeonList(Player* player, Creature* cr
     {
         uint32 mapEntry = dpair.first;
         Difficulty diff = dpair.second.minDifficulty;
-
-        MapEntry const* map = sMapStore.LookupEntry(mapEntry);
-        ASSERT(map);
+        std::string dungeonName = dpair.second.dungeonName;
 
         Identifier* idnt = new Identifier();
         idnt->id = ++id;
         std::ostringstream oss;
-        oss << map->name[locale];
+
+        // 优先使用自定义副本名称，如果为空则使用 DBC 名称
+        if (!dungeonName.empty())
+        {
+            oss << dungeonName;
+        }
+        else
+        {
+            MapEntry const* map = sMapStore.LookupEntry(mapEntry);
+            if (map)
+                oss << map->name[locale];
+            else
+                oss << "未知副本";
+        }
+
         oss << " [";
         if (diff == DUNGEON_DIFFICULTY_NORMAL)
         {
@@ -284,16 +296,28 @@ void MythicPlusNpcSupport::AddMythicPlusDungeonListForSnapshots(Player* player, 
     for (const auto& dpair : dungeons)
     {
         uint32 mapEntry = dpair.first;
-
-        MapEntry const* map = sMapStore.LookupEntry(mapEntry);
-        ASSERT(map);
+        std::string dungeonName = dpair.second.dungeonName;
 
         const std::vector<std::pair<std::pair<uint32, uint64>, std::vector<MythicPlus::MythicPlusDungeonSnapshot>>> snapshots = sMythicPlus->GetMapSnapshot(mapEntry, snapMythicLevel);
 
         Identifier* idnt = new Identifier();
         idnt->id = mapEntry;
         std::ostringstream oss;
-        oss << map->name[locale];
+
+        // 优先使用自定义副本名称，如果为空则使用 DBC 名称
+        if (!dungeonName.empty())
+        {
+            oss << dungeonName;
+        }
+        else
+        {
+            MapEntry const* map = sMapStore.LookupEntry(mapEntry);
+            if (map)
+                oss << map->name[locale];
+            else
+                oss << "未知副本";
+        }
+
         oss << " [总场次：";
         if (snapshots.empty())
             oss << MythicPlus::Utils::Colored("无", "b50505");
@@ -314,16 +338,31 @@ void MythicPlusNpcSupport::AddMythicPlusSnapshotAllRuns(Player* player, Creature
     pagedData.type = GossipSupport::PAGED_DATA_TYPE_MYTHIC_DUNGEON_LIST_SNAPSHOT_RUNS;
     pagedData.GetCustomInfo<MythicPlusNpcPageInfo>()->mapEntry = mapEntry;
 
-    MapEntry const* map = sMapStore.LookupEntry(mapEntry);
-    ASSERT(map);
-
+    const std::unordered_map<uint32, MythicPlus::MythicPlusCapableDungeon>& dungeons = sMythicPlus->GetAllMythicPlusDungeons();
     LocaleConstant locale = player->GetSession()->GetSessionDbcLocale();
+    std::string dungeonName;
+
+    // 尝试获取自定义副本名称
+    if (dungeons.find(mapEntry) != dungeons.end())
+    {
+        dungeonName = dungeons.at(mapEntry).dungeonName;
+    }
+
+    // 如果没有自定义名称，使用 DBC 名称
+    if (dungeonName.empty())
+    {
+        MapEntry const* map = sMapStore.LookupEntry(mapEntry);
+        if (map)
+            dungeonName = map->name[locale];
+        else
+            dungeonName = "未知副本";
+    }
 
     Identifier* mapIdnt = new Identifier();
     mapIdnt->id = 1;
     std::ostringstream oss;
     oss << "史诗钥石最佳计时：";
-    oss << map->name[locale];
+    oss << dungeonName;
     mapIdnt->uiName = oss.str();
     pagedData.data.push_back(mapIdnt);
 
@@ -428,10 +467,25 @@ void MythicPlusNpcSupport::AddMythicPlusDungeonSnapshotDetails(Player* player, C
         return a.snapTime < b.snapTime;
     });
 
-    MapEntry const* map = sMapStore.LookupEntry(mapEntry);
-    ASSERT(map);
-
+    const std::unordered_map<uint32, MythicPlus::MythicPlusCapableDungeon>& dungeons = sMythicPlus->GetAllMythicPlusDungeons();
     LocaleConstant locale = player->GetSession()->GetSessionDbcLocale();
+    std::string dungeonName;
+
+    // 尝试获取自定义副本名称
+    if (dungeons.find(mapEntry) != dungeons.end())
+    {
+        dungeonName = dungeons.at(mapEntry).dungeonName;
+    }
+
+    // 如果没有自定义名称，使用 DBC 名称
+    if (dungeonName.empty())
+    {
+        MapEntry const* map = sMapStore.LookupEntry(mapEntry);
+        if (map)
+            dungeonName = map->name[locale];
+        else
+            dungeonName = "未知副本";
+    }
 
     const MythicPlus::MythicPlusDungeonSnapshot* csnap = &chosenSnaps.at(0);
 
@@ -439,7 +493,7 @@ void MythicPlusNpcSupport::AddMythicPlusDungeonSnapshotDetails(Player* player, C
     idnt->id = 1;
     std::ostringstream oss;
     oss << "史诗钥石副本：";
-    oss << map->name[locale];
+    oss << dungeonName;
     oss << " ，层数：";
     oss << csnap->mythicLevel;
     idnt->uiName = oss.str();
