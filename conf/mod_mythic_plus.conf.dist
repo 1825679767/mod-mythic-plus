@@ -5,42 +5,42 @@
 [worldserver]
 
 ########################################
-# Mythic Plus configuration
+# 史诗钥石配置
 ########################################
 #
 #    MythicPlus.Enable
-#        Description: Enable or disable the system. This config is not hot-reloadable.
-#        Default:     0 - Disabled
-#                     1 - Enabled
+#        说明：启用或禁用系统。该配置不支持热重载。
+#        默认：     0 - 禁用
+#                     1 - 启用
 #
 
 MythicPlus.Enable = 1
 
 #
 #    MythicPlus.Penalty.OnDeath
-#        Description: Time (in seconds) that applies as penalty whenever a player dies inside M+
-#        Values:      0  - no penalty
-#                     >0 - value in seconds
-#        Default:     15 - subtracts 15 seconds from the timer
+#        说明：玩家在史诗钥石副本中死亡时追加的时间惩罚（单位：秒）。
+#        取值：      0  - 无惩罚
+#                     >0 - 指定秒数
+#        默认：     15 - 每次死亡计时增加 15 秒
 #
 
 MythicPlus.Penalty.OnDeath = 15
 
 #
 #    MythicPlus.KeystoneBuyTimer
-#        Description: Limits the buying of Mythic Keystones from the NPC. This value is in minutes.
-#        Values:      0    - no limit, players can buy the keystone whenever they want
-#                     60   - players can buy a keystone once every 60 minutes
-#        Default:     1440 - can buy the keystone once per day
+#        说明：限制从 NPC 购买史诗钥石的频率，单位为分钟。
+#        取值：      0    - 不限制，随时可买
+#                     60   - 每 60 分钟可购买一次
+#        默认：     1440 - 每天可购买一次
 #
 
 MythicPlus.KeystoneBuyTimer = 1440
 
 #
 #    MythicPlus.DropKeystoneOnDungeonComplete
-#        Description: Drops a Mythic Keystone for each player when the M+ dungeon was completed (players must beat the timer though)
-#        Values: 0 or 1
-#        Default: 1 - drop the keystone
+#        说明：当史诗钥石副本在时间限制内完成时，为每位玩家掉落一枚史诗钥石。
+#        取值：0 或 1
+#        默认：1 - 掉落钥石
 #
 
 MythicPlus.DropKeystoneOnDungeonComplete = 1

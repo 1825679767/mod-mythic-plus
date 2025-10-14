@@ -101,16 +101,16 @@ void HealthIncreaseAffix::HandleStaticEffect(Creature* creature)
 std::string HealthIncreaseAffix::ToString() const
 {
     std::ostringstream oss;
-    oss << "Health increased by ";
-    oss << std::fixed << std::setprecision(2) << healthMod * 100 << "% for ";
+    oss << "生命值提高 ";
+    oss << std::fixed << std::setprecision(2) << healthMod * 100 << "%，适用于";
     if (GetApplyForTrash() && GetApplyForBosses())
-        oss << "trash and bosses";
+        oss << "小怪和首领";
     else if (!GetApplyForTrash())
-        oss << "bosses only";
+        oss << "仅首领";
     else if (!GetApplyForBosses())
-        oss << "trash only";
+        oss << "仅小怪";
     else
-        oss << "unknown";
+        oss << "未知目标";
 
     return oss.str();
 }
@@ -156,17 +156,16 @@ TempSummon* MultipleEnemiesAffix::DoCreateCopy(Creature* creature)
 std::string MultipleEnemiesAffix::ToString() const
 {
     std::ostringstream oss;
-    oss << "Trash enemies can spawn a copy of each other";
-    oss << " (";
-    oss << MythicPlus::Utils::FormatFloat(chance) << "% chance per each creature)";
+    oss << "小怪有几率召唤彼此的复制体（每个生物有 ";
+    oss << MythicPlus::Utils::FormatFloat(chance) << "% 概率）";
     return oss.str();
 }
 
 std::string MoreDamageForCreaturesAffix::ToString() const
 {
     std::ostringstream oss;
-    oss << "All enemies deal ";
-    oss << MythicPlus::Utils::FormatFloat(perc) << "% more damage";
+    oss << "所有敌人造成 ";
+    oss << MythicPlus::Utils::FormatFloat(perc) << "% 的额外伤害";
     return oss.str();
 }
 
@@ -216,7 +215,7 @@ void RandomlyExplodeAffix::HandlePeriodicEffect(Unit* unit, uint32 diff)
 
 std::string RandomlyExplodeAffix::ToString() const
 {
-    return "Random explosions deal damage to players";
+    return "随机爆炸会对玩家造成伤害";
 }
 
 void LightningSphereAffix::HandlePeriodicEffectMap(Map* map, uint32 diff)
@@ -259,10 +258,10 @@ void LightningSphereAffix::HandlePeriodicEffectMap(Map* map, uint32 diff)
 std::string LightningSphereAffix::ToString() const
 {
     std::ostringstream oss;
-    oss << "Periodically summons lightning spheres that deal huge damage to players if not killed fast [";
-    oss << MythicPlus::Utils::FormatFloat(chanceOfSpawn) << "% chance to spawn every ";
+    oss << "定期召唤闪电球，若不及时击杀会对玩家造成大量伤害 [";
+    oss << MythicPlus::Utils::FormatFloat(chanceOfSpawn) << "% 的刷新几率，每 ";
     oss << secsToTimeString(spawnTimerEnd / 1000);
-    oss << "]";
+    oss << " 刷新一次]";
     return oss.str();
 }
 
@@ -306,7 +305,7 @@ void EnemyEnrageAffix::HandlePeriodicEffect(Unit* unit, uint32 diff)
 
 std::string EnemyEnrageAffix::ToString() const
 {
-    return "Enemies (including bosses) can randomly enrage while in combat";
+    return "敌人（包括首领）在战斗中可能随机激怒";
 }
 
 void EntanglingRootsAffix::HandlePeriodicEffect(Unit* unit, uint32 diff)
@@ -342,7 +341,7 @@ void EntanglingRootsAffix::HandlePeriodicEffect(Unit* unit, uint32 diff)
                 std::list<Unit*> targets;
                 Acore::AnyUnfriendlyUnitInObjectRangeCheck u_check(player, player, srange);
                 Acore::UnitListSearcher<Acore::AnyUnfriendlyUnitInObjectRangeCheck> searcher(player, targets, u_check);
-                Cell::VisitObjects(player, searcher, srange);
+                Cell::VisitAllObjects(player, searcher, srange);
 
                 if (!targets.empty())
                 {
@@ -366,5 +365,5 @@ void EntanglingRootsAffix::HandlePeriodicEffect(Unit* unit, uint32 diff)
 
 std::string EntanglingRootsAffix::ToString() const
 {
-    return "Nearby enemies can cast entangling roots on players, freezing them in place and dealing damage";
+    return "附近敌人会对玩家施放缠绕根须，使其定身并造成伤害";
 }

@@ -1,6 +1,6 @@
 SET @Entry = 200005;
-SET @Name = "Mythic Plus";
-SET @Subname = "Master";
+SET @Name = "史诗钥石";
+SET @Subname = "管理员";
 
 DELETE FROM `creature_template_model` WHERE `CreatureID` = @Entry;
 DELETE FROM `creature_template` WHERE `entry` = @Entry;

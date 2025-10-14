@@ -52,7 +52,7 @@ MythicPlus::CreatureData* MythicPlus::GetCreatureData(Creature* creature, bool w
 /*static*/ void MythicPlus::BroadcastToPlayer(const Player* player, const std::string& message)
 {
     std::ostringstream oss;
-    oss << "|cffa11585[MYTHIC PLUS]|r: ";
+    oss << "|cffa11585[史诗钥石]|r：";
     oss << message;
     ChatHandler(player->GetSession()).SendSysMessage(oss.str());
 }
@@ -177,8 +177,8 @@ void MythicPlus::ProcessStaticAffixes(const MythicLevel* mythicLevel, Creature* 
 void MythicPlus::PrintMythicLevelInfo(const MythicLevel* mythicLevel, const Player* player) const
 {
     ChatHandler handler(player->GetSession());
-    handler.PSendSysMessage("Current Mythic Plus level is {}", mythicLevel->level);
-    handler.PSendSysMessage("Active affix count: {}", mythicLevel->affixes.size());
+    handler.PSendSysMessage("当前史诗钥石等级为 {}", mythicLevel->level);
+    handler.PSendSysMessage("启用的词缀数量：{}", mythicLevel->affixes.size());
     uint32 counter = 1;
     for (const auto* affix : mythicLevel->affixes)
         handler.PSendSysMessage("    {}. {}", counter++, affix->ToString());
@@ -297,7 +297,7 @@ void MythicPlus::LoadMythicPlusCapableDungeonsFromDB()
         uint16 diff = fields[1].Get<uint16>();
         if (diff != DUNGEON_DIFFICULTY_NORMAL && diff != DUNGEON_DIFFICULTY_HEROIC)
         {
-            LOG_ERROR("sql.sql", "Table `mythic_plus_capable_dungeon` has invalid mapdifficulty '{}', ignoring", diff);
+            LOG_ERROR("sql.sql", "表 `mythic_plus_capable_dungeon` 的 mapdifficulty '{}' 无效，已忽略", diff);
             continue;
         }
         uint32 finalBossEntry = fields[2].Get<uint32>();
@@ -468,7 +468,7 @@ void MythicPlus::LoadMythicAffixFromDB()
         uint16 affixType = fields[1].Get<uint16>();
         if (affixType >= MAX_AFFIX_TYPE)
         {
-            LOG_ERROR("sql.sql", "Table `mythic_plus_affix` has invalid affix type '{}', ignoring", affixType);
+            LOG_ERROR("sql.sql", "表 `mythic_plus_affix` 的 affix type '{}' 无效，已忽略", affixType);
             continue;
         }
         float val1 = fields[2].Get<float>();
@@ -492,7 +492,7 @@ void MythicPlus::LoadMythicRewardsFromDB()
         uint16 rewardType = fields[1].Get<uint16>();
         if (rewardType >= DBReward::MAX_REWARD_TYPE)
         {
-            LOG_ERROR("sql.sql", "Table `mythic_plus_level_rewards` has invalid rewardtype '{}', ignoring", rewardType);
+            LOG_ERROR("sql.sql", "表 `mythic_plus_level_rewards` 的 rewardtype '{}' 无效，已忽略", rewardType);
             continue;
         }
         uint32 val1 = fields[2].Get<uint32>();
@@ -601,7 +601,7 @@ void MythicPlus::LoadSpellOverridesFromDB()
         name = creatureTemplate->Name;
 
     if (name.empty())
-        name = "Unknown creature";
+        name = "未知生物";
 
     return name;
 }
@@ -621,23 +621,23 @@ void MythicPlus::LoadSpellOverridesFromDB()
     if (gold > 0)
     {
         if (colored)
-            oss << gold << "|cffb3aa34g|r";
+            oss << gold << "|cffb3aa34金|r";
         else
-            oss << gold << "g";
+            oss << gold << "金";
     }
     if (silver > 0)
     {
         if (colored)
-            oss << silver << "|cff7E7C7Fs|r";
+            oss << silver << "|cff7E7C7F银|r";
         else
-            oss << silver << "s";
+            oss << silver << "银";
     }
     if (copper > 0)
     {
         if (colored)
-            oss << copper << "|cff974B29c|r";
+            oss << copper << "|cff974B29铜|r";
         else
-            oss << copper << "c";
+            oss << copper << "铜";
     }
 
     return oss.str();
@@ -1013,8 +1013,9 @@ bool MythicPlus::GiveKeystone(Player* player)
             if (diff < keystoneBuyTimer * 60)
             {
                 std::ostringstream oss;
-                oss << "You can buy another Mythic Kyestone in ";
+                oss << "你可以在 ";
                 oss << secsToTimeString(keystoneBuyTimer * 60 - diff);
+                oss << " 后再次购买史诗钥石";
                 BroadcastToPlayer(player, oss.str());
                 return false;
             }
@@ -1022,7 +1023,7 @@ bool MythicPlus::GiveKeystone(Player* player)
     }
     if (!player->AddItem(KEYSTONE_ENTRY, 1))
     {
-        BroadcastToPlayer(player, "Can't add Mythic Keystone. Check your inventory.");
+        BroadcastToPlayer(player, "无法添加史诗钥石，请检查你的背包。");
         return false;
     }
 

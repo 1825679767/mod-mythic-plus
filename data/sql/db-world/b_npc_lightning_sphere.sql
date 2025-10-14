@@ -1,6 +1,6 @@
 SET @Entry = 200006;
-SET @Name = "Lightning";
-SET @Subname = "Sphere";
+SET @Name = "闪电";
+SET @Subname = "球体";
 
 DELETE FROM `creature_template_model` WHERE `CreatureID` = @Entry;
 DELETE FROM `creature_template` WHERE `entry` = @Entry;

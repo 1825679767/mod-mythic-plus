@@ -22,13 +22,13 @@ void MythicPlusNpcSupport::AddMainMenu(Player* player, Creature* creature)
     {
         Identifier* disabledIdnt = new Identifier();
         disabledIdnt->id = 0;
-        disabledIdnt->uiName = MythicPlus::Utils::RedColored("!!! SYSTEM IS NOT ACTIVE !!!");
+        disabledIdnt->uiName = MythicPlus::Utils::RedColored("!!! 系统未启用 !!!");
         pagedData.data.push_back(disabledIdnt);
     }
 
     Identifier* i1 = new Identifier();
     i1->id = 1;
-    i1->uiName = "Choose Mythic Plus level";
+    i1->uiName = "选择史诗钥石等级";
     i1->optionIcon = GOSSIP_ICON_BATTLE;
     pagedData.data.push_back(i1);
 
@@ -37,7 +37,7 @@ void MythicPlusNpcSupport::AddMainMenu(Player* player, Creature* creature)
     {
         Identifier* resetIdnt = new Identifier();
         resetIdnt->id = 2;
-        resetIdnt->uiName = "Reset Mythic Plus level [CURRENT: " + Acore::ToString(setLevel) + "]";
+        resetIdnt->uiName = "重置史诗钥石等级 [当前：" + Acore::ToString(setLevel) + "]";
         resetIdnt->optionIcon = GOSSIP_ICON_BATTLE;
         pagedData.data.push_back(resetIdnt);
     }
@@ -45,7 +45,7 @@ void MythicPlusNpcSupport::AddMainMenu(Player* player, Creature* creature)
     {
         Identifier* nothingIdnt = new Identifier();
         nothingIdnt->id = 3;
-        nothingIdnt->uiName = MythicPlus::Utils::Colored("No Mythic Plus level set", "b50505");
+        nothingIdnt->uiName = MythicPlus::Utils::Colored("尚未设置史诗钥石等级", "b50505");
         nothingIdnt->optionIcon = GOSSIP_ICON_CHAT;
         pagedData.data.push_back(nothingIdnt);
     }
@@ -59,50 +59,50 @@ void MythicPlusNpcSupport::AddMainMenu(Player* player, Creature* creature)
         dungeonLevelIdnt->id = 4;
         dungeonLevelIdnt->optionIcon = GOSSIP_ICON_CHAT;
         std::ostringstream oss;
-        oss << "Current dungeon Mythic Plus level (based on leader): ";
+        oss << "当前副本的史诗钥石等级（基于队长）：";
         if (leaderLevel == 0)
 
-            oss << MythicPlus::Utils::Colored("NONE (0)", "b50505");
+            oss << MythicPlus::Utils::Colored("无（0）", "b50505");
         else
             oss << leaderLevel;
         if (!leader)
-            oss << " [LEADER OFFLINE]";
+            oss << " [队长离线]";
         dungeonLevelIdnt->uiName = oss.str();
         pagedData.data.push_back(dungeonLevelIdnt);
     }
 
     Identifier* mPlusListIdnt = new Identifier();
     mPlusListIdnt->id = 5;
-    mPlusListIdnt->uiName = "List of all Mythic Plus capable dungeons";
+    mPlusListIdnt->uiName = "所有可进行史诗钥石的副本列表";
     pagedData.data.push_back(mPlusListIdnt);
 
     Identifier* standingsRefreshIdnt = new Identifier();
     standingsRefreshIdnt->id = 6;
     std::ostringstream oss;
-    oss << "Mythic Plus standings refresh in: ";
+    oss << "距离史诗钥石排行榜刷新还有：";
     oss << MythicPlus::Utils::Colored(secsToTimeString((MythicPlus::MYTHIC_SNAPSHOTS_TIMER_FREQ - sMythicPlus->GetMythicSnapshotsTimer()) / 1000), "b50505");
     standingsRefreshIdnt->uiName = oss.str();
     pagedData.data.push_back(standingsRefreshIdnt);
 
     Identifier* standings = new Identifier();
     standings->id = 7;
-    standings->uiName = "Mythic Plus standings -->";
+    standings->uiName = "史诗钥石排行榜 -->";
     pagedData.data.push_back(standings);
 
     Identifier* keystoneIdnt = new Identifier();
     keystoneIdnt->id = 8;
     std::ostringstream koss;
-    koss << MythicPlus::Utils::Colored("Acquire Mythic Plus keystone", "700c63");
+    koss << MythicPlus::Utils::Colored("获取史诗钥石", "700c63");
     if (sMythicPlus->GetKeystoneBuyTimer() > 0)
     {
         uint32 playerKeystoneBuyTimer = sMythicPlus->GetKeystoneBuyTimer(player);
-        std::string available = MythicPlus::Utils::GreenColored(" [AVAILABLE NOW]");
+        std::string available = MythicPlus::Utils::GreenColored(" [可立即领取]");
         if (playerKeystoneBuyTimer > 0)
         {
             uint64 now = MythicPlus::Utils::GameTimeCount();
             uint64 diff = now - playerKeystoneBuyTimer;
             if (diff < sMythicPlus->GetKeystoneBuyTimer() * 60)
-                available = MythicPlus::Utils::RedColored(" [AVAILABLE IN " + secsToTimeString(sMythicPlus->GetKeystoneBuyTimer() * 60 - diff));
+                available = MythicPlus::Utils::RedColored(" [还需 " + secsToTimeString(sMythicPlus->GetKeystoneBuyTimer() * 60 - diff) + " 才可领取]");
         }
         koss << available;
     }
@@ -112,13 +112,13 @@ void MythicPlusNpcSupport::AddMainMenu(Player* player, Creature* creature)
 
     Identifier* randomMythicIdnt = new Identifier();
     randomMythicIdnt->id = 9;
-    randomMythicIdnt->uiName = "See the list of possible random affixes -->";
+    randomMythicIdnt->uiName = "查看可能出现的随机词缀 -->";
     randomMythicIdnt->optionIcon = GOSSIP_ICON_BATTLE;
     pagedData.data.push_back(randomMythicIdnt);
 
     Identifier* bye = new Identifier();
     bye->id = 10;
-    bye->uiName = "Nevermind...";
+    bye->uiName = "不用了……";
     pagedData.data.push_back(bye);
 
     pagedData.SortAndCalculateTotals(CompareIdentifierById);
@@ -137,10 +137,10 @@ void MythicPlusNpcSupport::AddMythicPlusLevels(Player* player, Creature* creatur
         idnt->id = mlevel.level;
         idnt->optionIcon = GOSSIP_ICON_BATTLE;
         std::ostringstream oss;
-        oss << "Mythic level " << mlevel.level;
-        oss << " (" << mlevel.affixes.size() << " affix(es))";
+        oss << "钥石层数 " << mlevel.level;
+        oss << "（" << mlevel.affixes.size() << " 个词缀）";
         if (mlevel.randomAffixCount > 0)
-            oss << " (" << mlevel.randomAffixCount << " random affix(es))";
+            oss << "（" << mlevel.randomAffixCount << " 个随机词缀）";
         oss << " -->";
         idnt->uiName = oss.str();
         pagedData.data.push_back(idnt);
@@ -161,7 +161,7 @@ void MythicPlusNpcSupport::AddMythicPlusLevelInfo(Player* player, Creature* crea
     Identifier* idnt = new Identifier();
     idnt->id = ++id;
     idnt->optionIcon = GOSSIP_ICON_BATTLE;
-    idnt->uiName = MythicPlus::Utils::Colored("Click to choose Mythic Level " + Acore::ToString(mythicLevel), "0a4a0e");
+    idnt->uiName = MythicPlus::Utils::Colored("点击选择钥石层数 " + Acore::ToString(mythicLevel), "0a4a0e");
     pagedData.data.push_back(idnt);
 
     const MythicLevel* level = sMythicPlus->GetMythicLevel(mythicLevel);
@@ -169,7 +169,7 @@ void MythicPlusNpcSupport::AddMythicPlusLevelInfo(Player* player, Creature* crea
 
     Identifier* timerIdnt = new Identifier();
     timerIdnt->id = ++id;
-    timerIdnt->uiName = "Time limit to get rewards: " + secsToTimeString(level->timeLimit);
+    timerIdnt->uiName = "获取奖励的时限：" + secsToTimeString(level->timeLimit);
     pagedData.data.push_back(timerIdnt);
 
     for (int i = 0; i < level->affixes.size(); i++)
@@ -179,11 +179,11 @@ void MythicPlusNpcSupport::AddMythicPlusLevelInfo(Player* player, Creature* crea
         Identifier* affixIdnt = new Identifier();
         affixIdnt->id = ++id;
         std::ostringstream oss;
-        oss << "Affix ";
-        oss << i + 1 << ": ";
+        oss << "词缀 ";
+        oss << i + 1 << "：";
         oss << affix->ToString();
         if (affix->IsRandom())
-            oss << MythicPlus::Utils::Colored(" [RANDOMLY GENERATED]", "1a0966");
+            oss << MythicPlus::Utils::Colored(" [随机生成]", "1a0966");
         affixIdnt->uiName = oss.str();
         pagedData.data.push_back(affixIdnt);
     }
@@ -191,7 +191,7 @@ void MythicPlusNpcSupport::AddMythicPlusLevelInfo(Player* player, Creature* crea
     Identifier* rewardsIdnt = new Identifier();
     rewardsIdnt->id = ++id;
     rewardsIdnt->optionIcon = GOSSIP_ICON_MONEY_BAG;
-    rewardsIdnt->uiName = MythicPlus::Utils::Colored("-- REWARDS --", "0d852d");
+    rewardsIdnt->uiName = MythicPlus::Utils::Colored("-- 奖励 --", "0d852d");
     pagedData.data.push_back(rewardsIdnt);
 
     const MythicReward& reward = level->reward;
@@ -200,7 +200,7 @@ void MythicPlusNpcSupport::AddMythicPlusLevelInfo(Player* player, Creature* crea
         Identifier* moneyIdnt = new Identifier();
         moneyIdnt->id = ++id;
         moneyIdnt->optionIcon = GOSSIP_ICON_MONEY_BAG;
-        moneyIdnt->uiName = "Gold: " + MythicPlus::Utils::CopperToMoneyStr(reward.money, false);
+        moneyIdnt->uiName = "金币：" + MythicPlus::Utils::CopperToMoneyStr(reward.money, false);
         pagedData.data.push_back(moneyIdnt);
     }
 
@@ -213,7 +213,7 @@ void MythicPlusNpcSupport::AddMythicPlusLevelInfo(Player* player, Creature* crea
             tokenIdnt->optionIcon = GOSSIP_ICON_VENDOR;
             std::ostringstream oss;
             oss << MythicPlus::Utils::ItemLinkForUI(token.first, player);
-            oss << " - " << token.second << "x";
+            oss << " - " << token.second << "×";
             tokenIdnt->uiName = oss.str();
             pagedData.data.push_back(tokenIdnt);
         }
@@ -247,12 +247,12 @@ void MythicPlusNpcSupport::AddMythicPlusDungeonList(Player* player, Creature* cr
         if (diff == DUNGEON_DIFFICULTY_NORMAL)
         {
             if (MythicPlus::Utils::CanBeHeroic(mapEntry))
-                oss << "NORMAL/HEROIC]";
+                oss << "普通/英雄]";
             else
-                oss << "NORMAL]";
+                oss << "普通]";
         }
         else
-            oss << "HEROIC ONLY]";
+            oss << "仅限英雄]";
         idnt->uiName = oss.str();
         pagedData.data.push_back(idnt);
     }
@@ -270,9 +270,9 @@ void MythicPlusNpcSupport::AddMythicPlusDungeonListForSnapshots(Player* player, 
     Identifier* mlevelIdnt = new Identifier();
     mlevelIdnt->id = 1;
     std::ostringstream oss;
-    oss << "Selected Mythic Plus level: ";
+    oss << "已选择的史诗钥石等级：";
     if (snapMythicLevel == 0)
-        oss << "ALL";
+        oss << "全部";
     else
         oss << snapMythicLevel;
     mlevelIdnt->uiName = oss.str();
@@ -294,9 +294,9 @@ void MythicPlusNpcSupport::AddMythicPlusDungeonListForSnapshots(Player* player, 
         idnt->id = mapEntry;
         std::ostringstream oss;
         oss << map->name[locale];
-        oss << " [TOTAL RUNS: ";
+        oss << " [总场次：";
         if (snapshots.empty())
-            oss << MythicPlus::Utils::Colored("NONE", "b50505");
+            oss << MythicPlus::Utils::Colored("无", "b50505");
         else
             oss << snapshots.size();
         oss << "]";
@@ -322,7 +322,7 @@ void MythicPlusNpcSupport::AddMythicPlusSnapshotAllRuns(Player* player, Creature
     Identifier* mapIdnt = new Identifier();
     mapIdnt->id = 1;
     std::ostringstream oss;
-    oss << "Mythic Plus top timers for ";
+    oss << "史诗钥石最佳计时：";
     oss << map->name[locale];
     mapIdnt->uiName = oss.str();
     pagedData.data.push_back(mapIdnt);
@@ -345,28 +345,28 @@ void MythicPlusNpcSupport::AddMythicPlusSnapshotAllRuns(Player* player, Creature
             if (snap.totalTime > 0)
             {
                 oss << secsToTimeString(snap.totalTime);
-                oss << " [LIMIT: ";
+                oss << " [限定时间：";
                 oss << secsToTimeString(snap.timelimit);
                 oss << "]";
                 if (snap.rewarded)
-                    oss << MythicPlus::Utils::GreenColored(" [REWARDED]");
+                    oss << MythicPlus::Utils::GreenColored(" [已获取奖励]");
                 else
-                    oss << MythicPlus::Utils::RedColored(" [NOT REWARDED]");
+                    oss << MythicPlus::Utils::RedColored(" [未获奖励]");
             }
             else
             {
-                oss << MythicPlus::Utils::RedColored("NOT FINISHED");
-                oss << " [LIMIT: ";
+                oss << MythicPlus::Utils::RedColored("未完成");
+                oss << " [限定时间：";
                 oss << secsToTimeString(snap.timelimit);
                 oss << "]";
             }
-            oss << " [M+ LEVEL ";
+            oss << " [M+ 等级 ";
             oss << snap.mythicLevel;
             oss << "]";
             if (snap.difficulty == DUNGEON_DIFFICULTY_NORMAL)
-                oss << " [NORMAL]";
+                oss << " [普通模式]";
             else
-                oss << MythicPlus::Utils::Colored(" [HEROIC]", "9e1849");
+                oss << MythicPlus::Utils::Colored(" [英雄模式]", "9e1849");
             idnt->uiName = oss.str();
             pagedData.data.push_back(idnt);
         }
@@ -383,7 +383,7 @@ void MythicPlusNpcSupport::AddMythicPlusAllLevels(Player* player, Creature* crea
 
     Identifier* allIdnt = new Identifier();
     allIdnt->id = 0;
-    allIdnt->uiName = "ALL Mythic Plus levels";
+    allIdnt->uiName = "所有史诗钥石等级";
     pagedData.data.push_back(allIdnt);
 
     const MythicLevelContainer& mythicLevels = sMythicPlus->GetAllMythicLevels();
@@ -393,7 +393,7 @@ void MythicPlusNpcSupport::AddMythicPlusAllLevels(Player* player, Creature* crea
         idnt->id = mlevel.level;
         idnt->optionIcon = GOSSIP_ICON_BATTLE;
         std::ostringstream oss;
-        oss << "Mythic level " << mlevel.level << " -- >";
+        oss << "钥石层数 " << mlevel.level << " -- >";
         idnt->uiName = oss.str();
         pagedData.data.push_back(idnt);
     }
@@ -438,9 +438,9 @@ void MythicPlusNpcSupport::AddMythicPlusDungeonSnapshotDetails(Player* player, C
     Identifier* idnt = new Identifier();
     idnt->id = 1;
     std::ostringstream oss;
-    oss << "Mythic Plus run for ";
+    oss << "史诗钥石副本：";
     oss << map->name[locale];
-    oss << " at level ";
+    oss << " ，层数：";
     oss << csnap->mythicLevel;
     idnt->uiName = oss.str();
     pagedData.data.push_back(idnt);
@@ -450,9 +450,9 @@ void MythicPlusNpcSupport::AddMythicPlusDungeonSnapshotDetails(Player* player, C
 
     Identifier* startTimeIdnt = new Identifier();
     startTimeIdnt->id = 2;
-    oss << "Run started at ";
+    oss << "开始时间：";
     oss << MythicPlus::Utils::DateFromSeconds(csnap->startTime);
-    oss << " [UTC TIME]";
+    oss << " [UTC 时间]";
     startTimeIdnt->uiName = oss.str();
     pagedData.data.push_back(startTimeIdnt);
 
@@ -463,15 +463,15 @@ void MythicPlusNpcSupport::AddMythicPlusDungeonSnapshotDetails(Player* player, C
     endTimeIdnt->id = 3;
     if (csnap->totalTime > 0)
     {
-        oss << "Run ended at ";
+        oss << "结束时间：";
         oss << MythicPlus::Utils::DateFromSeconds(csnap->endTime);
-        oss << " [UTC TIME]";
-        oss << " [DURATION: ";
+        oss << " [UTC 时间]";
+        oss << " [耗时：";
         oss << secsToTimeString(csnap->totalTime);
         oss << "]";
     }
     else
-        oss << MythicPlus::Utils::RedColored("Run did not end (yet, or orphaned instance)");
+        oss << MythicPlus::Utils::RedColored("副本尚未结束（或实例已失效）");
     endTimeIdnt->uiName = oss.str();
     pagedData.data.push_back(endTimeIdnt);
 
@@ -481,13 +481,13 @@ void MythicPlusNpcSupport::AddMythicPlusDungeonSnapshotDetails(Player* player, C
     oss.clear();
     if (csnap->totalDeaths > 0)
     {
-        oss << "Deaths: ";
+        oss << "死亡次数：";
         oss << MythicPlus::Utils::RedColored(Acore::ToString(csnap->totalDeaths));
-        oss << ". Time penalty: ";
+        oss << "。时间惩罚：";
         oss << secsToTimeString(csnap->penaltyOnDeath * csnap->totalDeaths);
     }
     else
-        oss << MythicPlus::Utils::GreenColored("NO DEATHS");
+        oss << MythicPlus::Utils::GreenColored("无死亡");
     deathsIdnt->uiName = oss.str();
     pagedData.data.push_back(deathsIdnt);
 
@@ -498,17 +498,17 @@ void MythicPlusNpcSupport::AddMythicPlusDungeonSnapshotDetails(Player* player, C
         oss.clear();
 
         oss << MythicPlus::Utils::Colored(MythicPlus::Utils::GetCreatureNameByEntry(player, s.entry), "102163");
-        oss << " downed at ";
+        oss << " 击败于：";
         oss << MythicPlus::Utils::DateFromSeconds(s.snapTime);
-        oss << " [took ";
+        oss << " [战斗耗时 ";
         oss << secsToTimeString(s.combatTime);
         oss << "]";
-        oss << " [PLAYERS: ";
+        oss << " [玩家：";
         oss << MythicPlus::Utils::Colored(s.players, "6e1849");
         oss << "]";
 
         if (s.randomAffixCount > 0)
-            oss << " [RANDOM AFFIXES: " << s.randomAffixCount << "]";
+            oss << " [随机词缀：" << s.randomAffixCount << "]";
 
         Identifier* idnt = new Identifier();
         idnt->id = ++id;
@@ -521,9 +521,9 @@ void MythicPlusNpcSupport::AddMythicPlusDungeonSnapshotDetails(Player* player, C
         Identifier* rewardIdnt = new Identifier();
         rewardIdnt->id = ++id;
         if (csnap->rewarded)
-            rewardIdnt->uiName = MythicPlus::Utils::GreenColored("TIMER WAS BEATEN - REWARDS RECEIVED");
+            rewardIdnt->uiName = MythicPlus::Utils::GreenColored("战胜计时——奖励已发放");
         else
-            rewardIdnt->uiName = MythicPlus::Utils::RedColored("NO REWARDS RECEIVED - TIMER LIMIT EXCEEDED");
+            rewardIdnt->uiName = MythicPlus::Utils::RedColored("未获奖励——超出计时限制");
         pagedData.data.push_back(rewardIdnt);
     }
 
@@ -540,7 +540,7 @@ void MythicPlusNpcSupport::AddRandomAfixes(Player* player, Creature* creature)
 
     Identifier* infoIdnt = new Identifier();
     infoIdnt->id = id++;
-    infoIdnt->uiName = "Some Mythic levels can have a set number of random affixes that will be chosen from this pool. Random affixes are shuffled with each server restart.";
+    infoIdnt->uiName = "部分钥石层数会从该列表中抽取固定数量的随机词缀，服务器重启时会重新洗牌。";
     infoIdnt->optionIcon = GOSSIP_ICON_CHAT;
     pagedData.data.push_back(infoIdnt);
 
@@ -552,10 +552,10 @@ void MythicPlusNpcSupport::AddRandomAfixes(Player* player, Creature* creature)
             Identifier* idnt = new Identifier();
             idnt->id = 100 + mlevel.level;
             std::ostringstream oss;
-            oss << "Mythic level ";
+            oss << "钥石层数 ";
             oss << mlevel.level;
-            oss << " has ";
-            oss << mlevel.randomAffixCount << " random affixes set -->";
+            oss << " 拥有 ";
+            oss << mlevel.randomAffixCount << " 个随机词缀 -->";
             idnt->uiName = oss.str();
             pagedData.data.push_back(idnt);
         }
@@ -563,7 +563,7 @@ void MythicPlusNpcSupport::AddRandomAfixes(Player* player, Creature* creature)
 
     Identifier* affixesInfoIdnt = new Identifier();
     affixesInfoIdnt->id = 1000 + (id++);
-    affixesInfoIdnt->uiName = "Pool of random affixes:";
+    affixesInfoIdnt->uiName = "随机词缀池：";
     affixesInfoIdnt->optionIcon = GOSSIP_ICON_CHAT;
     pagedData.data.push_back(affixesInfoIdnt);
 
@@ -596,7 +596,7 @@ void MythicPlusNpcSupport::AddRandomAffixesForLevel(Player* player, Creature* cr
     uint32 id = 1;
     Identifier* levelIdnt = new Identifier();
     levelIdnt->id = id++;
-    levelIdnt->uiName = "Randomly generated affixes for Mythic Level " + Acore::ToString(level);
+    levelIdnt->uiName = "史诗钥石第 " + Acore::ToString(level) + " 层的随机词缀";
     levelIdnt->optionIcon = GOSSIP_ICON_CHAT;
     pagedData.data.push_back(levelIdnt);
 
@@ -635,11 +635,11 @@ bool MythicPlusNpcSupport::TakePagedDataAction(Player* player, Creature* creatur
         {
             if (sMythicPlus->SetCurrentMythicPlusLevel(player, 0))
             {
-                MythicPlus::BroadcastToPlayer(player, "Your Mythic Plus level was reset!");
+                MythicPlus::BroadcastToPlayer(player, "你的史诗钥石等级已被重置！");
                 MythicPlus::Utils::VisualFeedback(player);
             }
             else
-                MythicPlus::BroadcastToPlayer(player, "You can't reset your Mythic Plus level while in a group.");
+                MythicPlus::BroadcastToPlayer(player, "在队伍中无法重置史诗钥石等级。");
 
             CloseGossipMenuFor(player);
             return true;
@@ -689,11 +689,11 @@ bool MythicPlusNpcSupport::TakePagedDataAction(Player* player, Creature* creatur
         {
             if (sMythicPlus->SetCurrentMythicPlusLevel(player, chosenMythicLevel))
             {
-                MythicPlus::BroadcastToPlayer(player, "Your Mythic Plus level was set to " + Acore::ToString(chosenMythicLevel));
+                MythicPlus::BroadcastToPlayer(player, "你的史诗钥石等级已设置为 " + Acore::ToString(chosenMythicLevel));
                 MythicPlus::Utils::VisualFeedback(player);
             }
             else
-                MythicPlus::BroadcastToPlayer(player, "You can't set your Mythic Plus level while in a group.");
+                MythicPlus::BroadcastToPlayer(player, "在队伍中无法设置史诗钥石等级。");
 
             CloseGossipMenuFor(player);
             return true;

@@ -34,7 +34,7 @@ public:
             ObjectGuid leaderGuid = group->GetLeaderGUID();
             uint32 mplusLevel = sMythicPlus->GetCurrentMythicPlusLevelForGUID(leaderGuid.GetCounter());
             if (mplusLevel > 0)
-                MythicPlus::BroadcastToPlayer(player, "Your group's leader (can even be you) has a Mythic Plus level set. The leader can use a Mythic Keystone to start a level " + Acore::ToString(mplusLevel) + " Mythic Plus dungeon!");
+                MythicPlus::BroadcastToPlayer(player, "你的队长（可能就是你）已设置史诗钥石层数。队长可以使用史诗钥石开启 " + Acore::ToString(mplusLevel) + " 层的史诗钥石副本！");
         }
     }
 
@@ -48,9 +48,9 @@ public:
             if (mapData->penaltyOnDeath > 0 && !mapData->done)
             {
                 std::ostringstream oss;
-                oss << player->GetName() << " just died, a penalty of ";
+                oss << player->GetName() << " 刚刚阵亡，计时增加了 ";
                 oss << secsToTimeString(mapData->penaltyOnDeath);
-                oss << " was applied.";
+                oss << "。";
 
                 Map* map = player->GetMap();
                 sMythicPlus->BroadcastToMap(player->GetMap(), MythicPlus::Utils::RedColored(oss.str()));

@@ -41,7 +41,7 @@ private:
             sMythicPlus->PrintMythicLevelInfo(level, player);
         }
         else
-            handler->SendSysMessage("You are not in a Mythic Plus dungeon right now.");
+            handler->SendSysMessage("你当前不在史诗钥石副本中。");
 
         return true;
     }
@@ -52,7 +52,7 @@ private:
         sMythicPlus->LoadIgnoredEntriesForMultiplyAffixFromDB();
         sMythicPlus->LoadScaleMapFromDB();
         sMythicPlus->LoadSpellOverridesFromDB();
-        handler->SendGlobalGMSysMessage("Hot reloadable tables were processed: mythic_plus_ignore_multiply_affix, mythic_plus_map_scale, mythic_plus_spell_override");
+        handler->SendGlobalGMSysMessage("已处理支持热重载的数据表：mythic_plus_ignore_multiply_affix、mythic_plus_map_scale、mythic_plus_spell_override");
 
         return true;
     }

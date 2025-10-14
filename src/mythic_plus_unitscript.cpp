@@ -47,7 +47,7 @@ public:
                 {
                     const std::string& cname = MythicPlus::Utils::GetCreatureName(player, creature);
                     std::ostringstream oss;
-                    oss << "Engaged " << cname << ". Good luck!";
+                    oss << "与 " << cname << " 交战，祝你好运！";
                     MythicPlus::AnnounceToPlayer(player, oss.str());
                     MythicPlus::BroadcastToPlayer(player, oss.str());
                 }
@@ -85,8 +85,7 @@ public:
                 {
                     const std::string& cname = MythicPlus::Utils::GetCreatureName(player, creature);
                     std::ostringstream oss;
-                    oss << cname << " was bested in " << downAfterStr;
-                    oss << ". Congratulations!";
+                    oss << cname << " 在 " << downAfterStr << " 内被击败。恭喜！";
                     MythicPlus::AnnounceToPlayer(player, oss.str());
                     MythicPlus::BroadcastToPlayer(player, oss.str());
 
@@ -98,8 +97,9 @@ public:
                     if (finalBoss)
                     {
                         std::ostringstream oss2;
-                        oss2 << "Mythic Plus dungeon ended after ";
+                        oss2 << "史诗钥石副本已在 ";
                         oss2 << secsToTimeString(gameTime - savedDungeon->startTime);
+                        oss2 << " 后结束。";
                         MythicPlus::AnnounceToPlayer(player, oss2.str());
                         MythicPlus::BroadcastToPlayer(player, oss2.str());
 
@@ -188,7 +188,7 @@ public:
                     return;
 
                 sMythicPlus->SaveDungeonInfo(map->GetInstanceId(), map->GetId(), 0, 0L, 0, 0, 0, false, false);
-                MythicPlus::AnnounceToMap(map, "This dungeon is now saved as non Mythic Plus!");
+                MythicPlus::AnnounceToMap(map, "此副本已保存为非史诗钥石模式！");
             }
         }
     }

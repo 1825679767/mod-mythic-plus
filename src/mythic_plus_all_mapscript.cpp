@@ -32,7 +32,7 @@ public:
             {
                 if (savedDungeon->mythicLevel > 0)
                 {
-                    MythicPlus::BroadcastToPlayer(player, "Tried to join a saved Mythic Plus instance but now the system is disabled.");
+                    MythicPlus::BroadcastToPlayer(player, "尝试加入已保存的史诗钥石副本，但系统现已停用。");
                     MythicPlus::FallbackTeleport(player);
                     return;
                 }
@@ -56,7 +56,7 @@ public:
                 if (savedDungeon->mythicLevel > 0 && mythicLevel == nullptr)
                 {
                     // edge case where a dungeon was saved as M+ but now the level does not longer exist (removed from DB)
-                    MythicPlus::BroadcastToPlayer(player, "This dungeon was saved as Mythic Plus but now it's level does no longer exist");
+                    MythicPlus::BroadcastToPlayer(player, "该副本曾保存为史诗钥石，但对应的层数已不存在。");
                     MythicPlus::FallbackTeleport(player);
                     return;
                 }
@@ -66,7 +66,7 @@ public:
 
                 if (player->GetLevel() < DEFAULT_MAX_LEVEL)
                 {
-                    MythicPlus::BroadcastToPlayer(player, "You must be max level in order to join Mythic Plus");
+                    MythicPlus::BroadcastToPlayer(player, "加入史诗钥石副本需要达到最高等级。");
                     MythicPlus::FallbackTeleport(player);
                     return;
                 }
@@ -80,11 +80,11 @@ public:
 
                 if (!mapData->mythicLevel)
                 {
-                    MythicPlus::BroadcastToPlayer(player, "You have just joined a Mythic Plus dungeon. All affixes have been set and saved for this specific instance.");
+                    MythicPlus::BroadcastToPlayer(player, "你刚加入一个史诗钥石副本，所有词缀已为本实例设置并保存。");
                     mapData->mythicLevel = mythicLevel;
                 }
                 else
-                    MythicPlus::BroadcastToPlayer(player, "You have joined an in progress Mythic Plus dungeon. All affixes were set and are active for this specific instance.");
+                    MythicPlus::BroadcastToPlayer(player, "你加入了一个正在进行的史诗钥石副本，所有词缀已设置并生效。");
 
                 sMythicPlus->PrintMythicLevelInfo(mapData->mythicLevel, player);
 
@@ -95,39 +95,39 @@ public:
                     mapData->updateTimer = diff * 1000;
                     if (diff + mapData->GetPenaltyTime() <= mapData->timeLimit)
                     {
-                        oss << "Mythic Plus dungeon is in progress. Current timer: ";
+                        oss << "史诗钥石副本正在进行。当前计时：";
                         oss << secsToTimeString(diff);
-                        oss << ". Beat this timer to get loot: ";
+                        oss << "。在此时间内完成即可获得战利品：";
                         oss << secsToTimeString(mapData->timeLimit);
                     }
                     else
                     {
-                        oss << "Mythic Plus dungeon is in progress but no loot will be received. ";
-                        oss << "Limit timer: " << secsToTimeString(mapData->timeLimit);
-                        oss << ". Current timer: " << secsToTimeString(diff);
+                        oss << "史诗钥石副本正在进行，但无法获得战利品。";
+                        oss << " 限定时间：" << secsToTimeString(mapData->timeLimit);
+                        oss << "。当前计时：" << secsToTimeString(diff);
                         mapData->receiveLoot = false;
                     }
 
                     if (mapData->penaltyOnDeath > 0)
                     {
                         std::ostringstream oss2;
-                        oss2 << "Dying will result in a penalty of ";
+                        oss2 << "死亡将带来时间惩罚：";
                         oss2 << secsToTimeString(mapData->penaltyOnDeath);
                         if (mapData->GetPenaltyTime() > 0)
                         {
-                            oss2 << ". Current penalty: ";
+                            oss2 << "。当前累计惩罚：";
                             oss2 << secsToTimeString(mapData->GetPenaltyTime());
 
-                            oss << ". Current penalty: ";
+                            oss << "。当前累计惩罚：";
                             oss << secsToTimeString(mapData->GetPenaltyTime());
                         }
                         else
-                            oss2 << ". No deaths so far!";
+                            oss2 << "。目前尚无死亡！";
                         MythicPlus::BroadcastToPlayer(player, MythicPlus::Utils::RedColored(oss2.str()));
                     }
                 }
                 else
-                    oss << "Joined a Mythic Plus dungeon that is already done.";
+                    oss << "已进入一个已完成的史诗钥石副本。";
                 MythicPlus::AnnounceToPlayer(player, oss.str());
             }
         }
@@ -137,7 +137,7 @@ public:
             // is no longer M+ capable
             if (savedDungeon != nullptr && savedDungeon->isMythic)
             {
-                MythicPlus::BroadcastToPlayer(player, "This dungeon was saved as Mythic Plus but now it can no longer be Mythic Plus");
+                MythicPlus::BroadcastToPlayer(player, "该副本曾保存为史诗钥石，但现在不再支持史诗钥石模式。");
                 MythicPlus::FallbackTeleport(player);
                 return;
             }
@@ -150,13 +150,13 @@ public:
         {
             MythicPlus::MapData* mapData = sMythicPlus->GetMapData(map, false);
             ASSERT(mapData);
-            if (mapData->receiveLoot && !mapData->done)
-            {
-                if (mapData->updateTimer / 1000 + mapData->GetPenaltyTime() > mapData->timeLimit)
+                if (mapData->receiveLoot && !mapData->done)
                 {
-                    MythicPlus::AnnounceToMap(map, "Time's up! You will not receive any Mythic Plus loot anymore.");
-                    mapData->receiveLoot = false;
-                }
+                    if (mapData->updateTimer / 1000 + mapData->GetPenaltyTime() > mapData->timeLimit)
+                    {
+                        MythicPlus::AnnounceToMap(map, "时间到！将不再获得任何史诗钥石战利品。");
+                        mapData->receiveLoot = false;
+                    }
 
                 mapData->updateTimer += diff;
             }
@@ -189,9 +189,9 @@ public:
                         ASSERT(mythicLevel);
 
                         std::ostringstream oss;
-                        oss << "Mythic Plus timer started! ";
-                        oss << "Beat this timer to get loot: " << secsToTimeString(mythicLevel->timeLimit) << ". ";
-                        oss << "Have fun!";
+                        oss << "史诗钥石计时开始！";
+                        oss << " 在此时间内完成即可获得战利品：" << secsToTimeString(mythicLevel->timeLimit) << "。";
+                        oss << "祝你玩得开心！";
                         MythicPlus::AnnounceToMap(map, oss.str());
 
                         uint32 timeLimit = mythicLevel->timeLimit;
@@ -204,7 +204,7 @@ public:
                         mapData->penaltyOnDeath = sMythicPlus->GetPenaltyOnDeath();
 
                         if (mapData->penaltyOnDeath > 0)
-                            sMythicPlus->BroadcastToMap(map, MythicPlus::Utils::RedColored("Dying will give a penalty of " + secsToTimeString(mapData->penaltyOnDeath)));
+                            sMythicPlus->BroadcastToMap(map, MythicPlus::Utils::RedColored("死亡将带来时间惩罚：" + secsToTimeString(mapData->penaltyOnDeath)));
                     }
                     else
                         instanceTimer[instanceId] += diff;

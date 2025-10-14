@@ -25,9 +25,9 @@ public:
             if (player)
             {
                 std::ostringstream oss;
-                oss << "This group's leader has a Mythic Plus level set (level: ";
+                oss << "该队伍的队长已设置史诗钥石层数（层数：";
                 oss << sMythicPlus->GetCurrentMythicPlusLevelForGUID(leaderGuid.GetCounter());
-                oss << ")! Group's leader can use a Mythic Keystone to transform a dungeon into Mythic Plus.";
+                oss << ")！队长可以使用史诗钥石将副本转换为史诗钥石副本。";
                 MythicPlus::BroadcastToPlayer(player, oss.str());
             }
         }
