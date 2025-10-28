@@ -271,6 +271,14 @@ public:
     {
         return dropKeystoneOnCompletion;
     }
+    uint32 GetRequiredPlayerLevel() const
+    {
+        return requiredPlayerLevel;
+    }
+    bool GetCheckGroupOnline() const
+    {
+        return checkGroupOnline;
+    }
     void ScaleCreature(Creature* creature);
     const MapScale* GetMapScale(const Map* map) const;
     bool CheckGroupLevelForKeystone(const Player* player) const;
@@ -287,6 +295,8 @@ private:
     uint32 penaltyOnDeath;
     uint32 keystoneBuyTimer;
     bool dropKeystoneOnCompletion;
+    uint32 requiredPlayerLevel;
+    bool checkGroupOnline;
 
     MythicLevelContainer mythicLevels;
 

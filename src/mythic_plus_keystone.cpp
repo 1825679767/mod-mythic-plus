@@ -4,6 +4,7 @@
 
 #include "ScriptMgr.h"
 #include "mythic_plus.h"
+#include <sstream>
 
 class mythic_plus_keystone : public ItemScript
 {
@@ -44,7 +45,27 @@ public:
                             {
                                 // every player in the group must be online and at max level
                                 if (!sMythicPlus->CheckGroupLevelForKeystone(player))
-                                    MythicPlus::BroadcastToPlayer(player, "队伍中所有玩家都必须在线且达到最高等级。");
+                                {
+                                    // 生成动态错误消息
+                                    std::ostringstream errMsg;
+                                    errMsg << "队伍限制：";
+
+                                    bool needAnd = false;
+                                    if (sMythicPlus->GetCheckGroupOnline())
+                                    {
+                                        errMsg << "所有玩家必须在线";
+                                        needAnd = true;
+                                    }
+
+                                    if (sMythicPlus->GetRequiredPlayerLevel() > 1)
+                                    {
+                                        if (needAnd)
+                                            errMsg << "且";
+                                        errMsg << "等级需达到 " << sMythicPlus->GetRequiredPlayerLevel() << " 级";
+                                    }
+
+                                    MythicPlus::BroadcastToPlayer(player, errMsg.str());
+                                }
                                 else
                                 {
                                     mapData->keystoneTimer = MythicPlus::Utils::GameTimeCount();

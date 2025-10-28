@@ -44,3 +44,22 @@ MythicPlus.KeystoneBuyTimer = 1440
 #
 
 MythicPlus.DropKeystoneOnDungeonComplete = 1
+
+#
+#    MythicPlus.RequiredPlayerLevel
+#        说明：使用史诗钥石时要求队伍中玩家的最低等级。
+#        取值：1-80（设置为 80 表示要求满级）
+#        默认：80 - 要求满级
+#
+
+MythicPlus.RequiredPlayerLevel = 80
+
+#
+#    MythicPlus.CheckGroupOnline
+#        说明：使用史诗钥石时是否检查队伍中所有玩家在线。
+#        取值：0 - 不检查（允许队员离线）
+#              1 - 检查（要求所有队员在线）
+#        默认：1 - 要求所有队员在线
+#
+
+MythicPlus.CheckGroupOnline = 1

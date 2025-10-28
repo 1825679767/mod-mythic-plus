@@ -18,6 +18,8 @@ MythicPlus::MythicPlus()
     penaltyOnDeath = 15;
     keystoneBuyTimer = 1440;
     dropKeystoneOnCompletion = true;
+    requiredPlayerLevel = 80;
+    checkGroupOnline = true;
 }
 
 MythicPlus::~MythicPlus()
@@ -978,6 +980,8 @@ void MythicPlus::ProcessConfig(bool reload)
     penaltyOnDeath = sConfigMgr->GetOption<uint32>("MythicPlus.Penalty.OnDeath", 15);
     keystoneBuyTimer = sConfigMgr->GetOption<uint32>("MythicPlus.KeystoneBuyTimer", 1440);
     dropKeystoneOnCompletion = sConfigMgr->GetOption<bool>("MythicPlus.DropKeystoneOnDungeonComplete", true);
+    requiredPlayerLevel = sConfigMgr->GetOption<uint32>("MythicPlus.RequiredPlayerLevel", 80);
+    checkGroupOnline = sConfigMgr->GetOption<bool>("MythicPlus.CheckGroupOnline", true);
 }
 
 bool MythicPlus::MatchMythicPlusMapDiff(const Map* map) const
@@ -1158,9 +1162,13 @@ bool MythicPlus::CheckGroupLevelForKeystone(const Player* player) const
     for (Group::member_citerator mitr = group->GetMemberSlots().begin(); mitr != group->GetMemberSlots().end(); ++mitr)
     {
         Player* member = ObjectAccessor::FindConnectedPlayer(mitr->guid);
-        if (!member)
+
+        // 检查玩家是否在线（如果配置要求检查）
+        if (checkGroupOnline && !member)
             return false;
-        if (member->GetLevel() < DEFAULT_MAX_LEVEL)
+
+        // 如果玩家在线，检查等级
+        if (member && member->GetLevel() < requiredPlayerLevel)
             return false;
     }
 
