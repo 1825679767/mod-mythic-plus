@@ -35,6 +35,16 @@ public:
         }
 
         sMythicPlus->UpdateMythicSnapshotsTimer(diff);
+
+        // 定期检查并重置过期的史诗钥石等级
+        uint32 autoResetTimer = sMythicPlus->GetAutoResetCheckTimer();
+        if (autoResetTimer == 0 || autoResetTimer >= MythicPlus::AUTO_RESET_CHECK_TIMER_FREQ)
+        {
+            sMythicPlus->CheckAndResetExpiredLevels();
+            sMythicPlus->ResetAutoResetCheckTimer();
+        }
+
+        sMythicPlus->UpdateAutoResetCheckTimer(diff);
     }
 
     void OnAfterConfigLoad(bool reload) override

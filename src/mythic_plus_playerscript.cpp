@@ -23,10 +23,13 @@ public:
         if (!sMythicPlus->IsEnabled())
             return;
 
+        // 初始化玩家的史诗钥石等级（如果是新玩家，设置为1级）
+        sMythicPlus->InitializePlayerMythicLevel(player);
+
         // check if the saved M+ level is still present (maybe it was removed from DB in the meantime)
         uint32 playerMplusLevel = sMythicPlus->GetCurrentMythicPlusLevel(player);
         if (playerMplusLevel > 0 && !sMythicPlus->GetMythicLevel(playerMplusLevel))
-            sMythicPlus->SetCurrentMythicPlusLevel(player, 0, true); // force reset the level, this is an edge case anyway
+            sMythicPlus->SetCurrentMythicPlusLevel(player, 1, true); // force reset the level to 1
 
         Group* group = player->GetGroup();
         if (group != nullptr)
@@ -34,7 +37,7 @@ public:
             ObjectGuid leaderGuid = group->GetLeaderGUID();
             uint32 mplusLevel = sMythicPlus->GetCurrentMythicPlusLevelForGUID(leaderGuid.GetCounter());
             if (mplusLevel > 0)
-                MythicPlus::BroadcastToPlayer(player, "你的队长（可能就是你）已设置史诗钥石层数。队长可以使用史诗钥石开启 " + Acore::ToString(mplusLevel) + " 层的史诗钥石副本！");
+                MythicPlus::BroadcastToPlayer(player, "你的队长（可能就是你）当前的史诗钥石等级为 " + Acore::ToString(mplusLevel) + " 级。队长可以使用史诗钥石开启挑战！");
         }
     }
 

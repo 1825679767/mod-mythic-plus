@@ -20,6 +20,8 @@ MythicPlus::MythicPlus()
     dropKeystoneOnCompletion = true;
     requiredPlayerLevel = 80;
     checkGroupOnline = true;
+    autoResetLevelDays = 7;
+    lastGlobalResetTime = 0;
 }
 
 MythicPlus::~MythicPlus()
@@ -220,6 +222,7 @@ void MythicPlus::LoadFromDB()
     LoadMythicRewardsFromDB();
     LoadMythicLevelsFromDB();
     LoadSpellOverridesFromDB();
+    LoadGlobalResetTimeFromDB();
 }
 
 MythicPlus::MythicPlusDungeonInfo* MythicPlus::GetSavedDungeonInfo(uint32 instanceId)
@@ -835,11 +838,13 @@ uint32 MythicPlus::GetCurrentMythicPlusLevelForGUID(uint32 guid) const
 
 bool MythicPlus::SetCurrentMythicPlusLevel(const Player* player, uint32 mythiclevel, bool force)
 {
-    if (player->GetGroup() == nullptr || force)
+    // 只有通过 force 参数才能设置等级（禁止玩家手动选择）
+    if (force)
     {
         uint32 guid = Utils::PlayerGUID(player);
+        uint64 now = Utils::GameTimeCount();
         charMythicLevels[guid] = mythiclevel;
-        CharacterDatabase.Execute("REPLACE INTO mythic_plus_char_level (guid, mythiclevel) VALUES ({}, {})", guid, mythiclevel);
+        CharacterDatabase.Execute("REPLACE INTO mythic_plus_char_level (guid, mythiclevel, last_upgrade_time) VALUES ({}, {}, {})", guid, mythiclevel, now);
         return true;
     }
 
@@ -857,6 +862,120 @@ uint32 MythicPlus::GetCurrentMythicPlusLevelForDungeon(const Player* player) con
         return 0;
 
     return GetCurrentMythicPlusLevel(leader);
+}
+
+bool MythicPlus::UpgradeMythicLevel(const Player* player)
+{
+    uint32 currentLevel = GetCurrentMythicPlusLevel(player);
+
+    // 检查是否还有更高等级
+    const MythicLevel* nextLevel = GetMythicLevel(currentLevel + 1);
+    if (nextLevel == nullptr)
+    {
+        BroadcastToPlayer(player, "你已达到史诗钥石最高等级！");
+        return false;
+    }
+
+    // 升级到下一等级
+    bool success = SetCurrentMythicPlusLevel(player, currentLevel + 1, true);
+    if (success)
+    {
+        std::ostringstream oss;
+        oss << "恭喜！你的史诗钥石等级已升至 " << (currentLevel + 1) << " 级！";
+        BroadcastToPlayer(player, oss.str());
+        Utils::VisualFeedback(const_cast<Player*>(player));
+    }
+
+    return success;
+}
+
+bool MythicPlus::ResetMythicLevel(const Player* player)
+{
+    bool success = SetCurrentMythicPlusLevel(player, 1, true);
+    if (success)
+    {
+        BroadcastToPlayer(player, "你的史诗钥石等级已重置为 1 级！");
+        Utils::VisualFeedback(const_cast<Player*>(player));
+    }
+    return success;
+}
+
+void MythicPlus::InitializePlayerMythicLevel(const Player* player)
+{
+    uint32 currentLevel = GetCurrentMythicPlusLevel(player);
+
+    // 如果玩家没有等级记录，初始化为1级
+    if (currentLevel == 0)
+    {
+        SetCurrentMythicPlusLevel(player, 1, true);
+    }
+}
+
+void MythicPlus::CheckAndResetExpiredLevels()
+{
+    // 如果禁用自动重置，直接返回
+    if (autoResetLevelDays == 0)
+        return;
+
+    uint64 now = Utils::GameTimeCount();
+    uint64 resetThreshold = autoResetLevelDays * 24 * 60 * 60; // 转换为秒
+
+    // 检查是否到了全局重置时间
+    if ((now - lastGlobalResetTime) < resetThreshold)
+        return; // 还没到重置时间
+
+    LOG_INFO("module", "史诗钥石系统：开始全局重置所有玩家等级...");
+
+    // 重置所有玩家的等级为1
+    CharacterDatabase.Execute("UPDATE mythic_plus_char_level SET mythiclevel = 1, last_upgrade_time = {} WHERE mythiclevel > 1", now);
+
+    // 更新内存中的数据
+    for (auto& pair : charMythicLevels)
+    {
+        if (pair.second > 1)
+        {
+            pair.second = 1;
+
+            // 通知在线玩家
+            Player* onlinePlayer = ObjectAccessor::FindPlayerByLowGUID(pair.first);
+            if (onlinePlayer)
+            {
+                std::ostringstream oss;
+                oss << "服务器进行了定期重置，所有玩家的史诗钥石等级已重置为 1 级。新的挑战周期开始！";
+                BroadcastToPlayer(onlinePlayer, oss.str());
+            }
+        }
+    }
+
+    // 更新全局重置时间
+    lastGlobalResetTime = now;
+    SaveGlobalResetTime();
+
+    LOG_INFO("module", "史诗钥石系统：全局重置完成！下次重置时间：{} 天后", autoResetLevelDays);
+}
+
+void MythicPlus::LoadGlobalResetTimeFromDB()
+{
+    QueryResult result = WorldDatabase.Query("SELECT last_reset_time FROM mythic_plus_global_reset WHERE id = 1");
+    if (result)
+    {
+        Field* fields = result->Fetch();
+        lastGlobalResetTime = fields[0].Get<uint64>();
+        LOG_INFO("module", "史诗钥石系统：加载全局重置时间 = {}", lastGlobalResetTime);
+    }
+    else
+    {
+        // 如果没有记录，初始化为当前时间
+        lastGlobalResetTime = Utils::GameTimeCount();
+        WorldDatabase.Execute("INSERT INTO mythic_plus_global_reset (id, last_reset_time) VALUES (1, {})", lastGlobalResetTime);
+        LOG_INFO("module", "史诗钥石系统：初始化全局重置时间 = {}", lastGlobalResetTime);
+    }
+}
+
+void MythicPlus::SaveGlobalResetTime()
+{
+    WorldDatabase.Execute("UPDATE mythic_plus_global_reset SET last_reset_time = {} WHERE id = 1", lastGlobalResetTime);
+    LOG_INFO("module", "史诗钥石系统：保存全局重置时间 = {}", lastGlobalResetTime);
 }
 
 void MythicPlus::ProcessQueryCallbacks()
@@ -982,6 +1101,7 @@ void MythicPlus::ProcessConfig(bool reload)
     dropKeystoneOnCompletion = sConfigMgr->GetOption<bool>("MythicPlus.DropKeystoneOnDungeonComplete", true);
     requiredPlayerLevel = sConfigMgr->GetOption<uint32>("MythicPlus.RequiredPlayerLevel", 80);
     checkGroupOnline = sConfigMgr->GetOption<bool>("MythicPlus.CheckGroupOnline", true);
+    autoResetLevelDays = sConfigMgr->GetOption<uint32>("MythicPlus.AutoResetLevelDays", 7);
 }
 
 bool MythicPlus::MatchMythicPlusMapDiff(const Map* map) const

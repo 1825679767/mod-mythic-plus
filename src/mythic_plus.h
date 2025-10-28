@@ -35,6 +35,7 @@ private:
     ~MythicPlus();
 public:
     static constexpr uint32 MYTHIC_SNAPSHOTS_TIMER_FREQ = 60 * 10 * 1000;
+    static constexpr uint32 AUTO_RESET_CHECK_TIMER_FREQ = 60 * 60 * 1000; // 每小时检查一次
     static constexpr uint32 KEYSTONE_START_TIMER = 10 * 1000;
     static constexpr uint32 KEYSTONE_ENTRY = 70001;
 
@@ -229,6 +230,10 @@ public:
     uint32 GetCurrentMythicPlusLevel(const Player* player) const;
     uint32 GetCurrentMythicPlusLevelForGUID(uint32 guid) const;
     bool SetCurrentMythicPlusLevel(const Player* player, uint32 mythiclevel, bool force = false);
+    bool UpgradeMythicLevel(const Player* player);
+    bool ResetMythicLevel(const Player* player);
+    void InitializePlayerMythicLevel(const Player* player);
+    void CheckAndResetExpiredLevels();
     uint32 GetCurrentMythicPlusLevelForDungeon(const Player* player) const;
     const std::unordered_map<uint32, MythicPlusCapableDungeon>& GetAllMythicPlusDungeons() const
     {
@@ -247,6 +252,18 @@ public:
     void ResetMythicSnapshotsTimer()
     {
         mythicSnapshotsTimer = 0;
+    }
+    uint32 GetAutoResetCheckTimer() const
+    {
+        return autoResetCheckTimer;
+    }
+    void UpdateAutoResetCheckTimer(uint32 diff)
+    {
+        autoResetCheckTimer += diff;
+    }
+    void ResetAutoResetCheckTimer()
+    {
+        autoResetCheckTimer = 0;
     }
     const std::vector<std::pair<std::pair<uint32, uint64>, std::vector<MythicPlusDungeonSnapshot>>> GetMapSnapshot(uint32 mapId, uint32 mythicLevel) const;
     void ProcessConfig(bool reload);
@@ -286,6 +303,8 @@ public:
     void LoadIgnoredEntriesForMultiplyAffixFromDB();
     void LoadScaleMapFromDB();
     void LoadSpellOverridesFromDB();
+    void LoadGlobalResetTimeFromDB();
+    void SaveGlobalResetTime();
 private:
     std::unordered_map<uint32, MythicPlusCapableDungeon> mythicPlusDungeons;
     std::unordered_map<uint32, MythicPlusDungeonInfo> mythicPlusDungeonInfo;
@@ -297,11 +316,14 @@ private:
     bool dropKeystoneOnCompletion;
     uint32 requiredPlayerLevel;
     bool checkGroupOnline;
+    uint32 autoResetLevelDays;
+    uint64 lastGlobalResetTime;
 
     MythicLevelContainer mythicLevels;
 
     QueryCallbackProcessor _queryProcessor;
     uint32 mythicSnapshotsTimer = 0;
+    uint32 autoResetCheckTimer = 0;
 
     std::unordered_map<uint32, std::vector<std::pair<std::pair<uint32, uint64>, std::vector<MythicPlusDungeonSnapshot>>>> dungeonMapSnapshots;
 

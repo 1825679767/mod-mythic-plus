@@ -63,3 +63,17 @@ MythicPlus.RequiredPlayerLevel = 80
 #
 
 MythicPlus.CheckGroupOnline = 1
+
+#
+#    MythicPlus.AutoResetLevelDays
+#        说明：服务器定期重置所有玩家史诗钥石等级的天数（从上次全局重置时间计算）。
+#              到达指定天数后，所有玩家的等级会统一重置为1级，开始新的挑战周期。
+#              类似于零售版魔兽世界的周常重置机制。
+#        取值：0     - 禁用自动重置（玩家等级永久保存）
+#              7     - 每7天全局重置一次（每周重置）
+#              30    - 每30天全局重置一次（每月重置）
+#        默认：7 - 每周全局重置
+#        注意：服务器会在后台每小时检查一次，到达重置时间后自动重置所有玩家。
+#
+
+MythicPlus.AutoResetLevelDays = 7

@@ -26,29 +26,22 @@ void MythicPlusNpcSupport::AddMainMenu(Player* player, Creature* creature)
         pagedData.data.push_back(disabledIdnt);
     }
 
-    Identifier* i1 = new Identifier();
-    i1->id = 1;
-    i1->uiName = "选择史诗钥石等级";
-    i1->optionIcon = GOSSIP_ICON_BATTLE;
-    pagedData.data.push_back(i1);
-
+    // 显示当前等级
     uint32 setLevel = sMythicPlus->GetCurrentMythicPlusLevel(player);
-    if (setLevel > 0)
-    {
-        Identifier* resetIdnt = new Identifier();
-        resetIdnt->id = 2;
-        resetIdnt->uiName = "重置史诗钥石等级 [当前：" + Acore::ToString(setLevel) + "]";
-        resetIdnt->optionIcon = GOSSIP_ICON_BATTLE;
-        pagedData.data.push_back(resetIdnt);
-    }
-    else
-    {
-        Identifier* nothingIdnt = new Identifier();
-        nothingIdnt->id = 3;
-        nothingIdnt->uiName = MythicPlus::Utils::Colored("尚未设置史诗钥石等级", "b50505");
-        nothingIdnt->optionIcon = GOSSIP_ICON_CHAT;
-        pagedData.data.push_back(nothingIdnt);
-    }
+    Identifier* levelIdnt = new Identifier();
+    levelIdnt->id = 1;
+    levelIdnt->optionIcon = GOSSIP_ICON_BATTLE;
+    std::ostringstream oss;
+    oss << "当前史诗钥石等级：" << MythicPlus::Utils::Colored(Acore::ToString(setLevel), "0a4a0e") << " 级";
+    levelIdnt->uiName = oss.str();
+    pagedData.data.push_back(levelIdnt);
+
+    // 重置等级选项（始终显示）
+    Identifier* resetIdnt = new Identifier();
+    resetIdnt->id = 2;
+    resetIdnt->uiName = MythicPlus::Utils::Colored("重置史诗钥石等级为 1 级", "b50505");
+    resetIdnt->optionIcon = GOSSIP_ICON_BATTLE;
+    pagedData.data.push_back(resetIdnt);
 
     if (player->GetGroup() != nullptr)
     {
@@ -56,41 +49,40 @@ void MythicPlusNpcSupport::AddMainMenu(Player* player, Creature* creature)
         uint32 leaderLevel = sMythicPlus->GetCurrentMythicPlusLevelForGUID(leaderGuid.GetCounter());
         Player* leader = ObjectAccessor::FindConnectedPlayer(leaderGuid);
         Identifier* dungeonLevelIdnt = new Identifier();
-        dungeonLevelIdnt->id = 4;
+        dungeonLevelIdnt->id = 3;
         dungeonLevelIdnt->optionIcon = GOSSIP_ICON_CHAT;
-        std::ostringstream oss;
-        oss << "当前副本的史诗钥石等级（基于队长）：";
+        std::ostringstream goss;
+        goss << "当前副本的史诗钥石等级（基于队长）：";
         if (leaderLevel == 0)
-
-            oss << MythicPlus::Utils::Colored("无（0）", "b50505");
+            goss << MythicPlus::Utils::Colored("无（0）", "b50505");
         else
-            oss << leaderLevel;
+            goss << leaderLevel;
         if (!leader)
-            oss << " [队长离线]";
-        dungeonLevelIdnt->uiName = oss.str();
+            goss << " [队长离线]";
+        dungeonLevelIdnt->uiName = goss.str();
         pagedData.data.push_back(dungeonLevelIdnt);
     }
 
     Identifier* mPlusListIdnt = new Identifier();
-    mPlusListIdnt->id = 5;
+    mPlusListIdnt->id = 4;
     mPlusListIdnt->uiName = "所有可进行史诗钥石的副本列表";
     pagedData.data.push_back(mPlusListIdnt);
 
     Identifier* standingsRefreshIdnt = new Identifier();
-    standingsRefreshIdnt->id = 6;
-    std::ostringstream oss;
-    oss << "距离史诗钥石排行榜刷新还有：";
-    oss << MythicPlus::Utils::Colored(secsToTimeString((MythicPlus::MYTHIC_SNAPSHOTS_TIMER_FREQ - sMythicPlus->GetMythicSnapshotsTimer()) / 1000), "b50505");
-    standingsRefreshIdnt->uiName = oss.str();
+    standingsRefreshIdnt->id = 5;
+    std::ostringstream toss;
+    toss << "距离史诗钥石排行榜刷新还有：";
+    toss << MythicPlus::Utils::Colored(secsToTimeString((MythicPlus::MYTHIC_SNAPSHOTS_TIMER_FREQ - sMythicPlus->GetMythicSnapshotsTimer()) / 1000), "b50505");
+    standingsRefreshIdnt->uiName = toss.str();
     pagedData.data.push_back(standingsRefreshIdnt);
 
     Identifier* standings = new Identifier();
-    standings->id = 7;
+    standings->id = 6;
     standings->uiName = "史诗钥石排行榜 -->";
     pagedData.data.push_back(standings);
 
     Identifier* keystoneIdnt = new Identifier();
-    keystoneIdnt->id = 8;
+    keystoneIdnt->id = 7;
     std::ostringstream koss;
     koss << MythicPlus::Utils::Colored("获取史诗钥石", "700c63");
     if (sMythicPlus->GetKeystoneBuyTimer() > 0)
@@ -111,13 +103,13 @@ void MythicPlusNpcSupport::AddMainMenu(Player* player, Creature* creature)
     pagedData.data.push_back(keystoneIdnt);
 
     Identifier* randomMythicIdnt = new Identifier();
-    randomMythicIdnt->id = 9;
+    randomMythicIdnt->id = 8;
     randomMythicIdnt->uiName = "查看可能出现的随机词缀 -->";
     randomMythicIdnt->optionIcon = GOSSIP_ICON_BATTLE;
     pagedData.data.push_back(randomMythicIdnt);
 
     Identifier* bye = new Identifier();
-    bye->id = 10;
+    bye->id = 9;
     bye->uiName = "不用了……";
     pagedData.data.push_back(bye);
 
@@ -680,37 +672,39 @@ bool MythicPlusNpcSupport::TakePagedDataAction(Player* player, Creature* creatur
     PagedData& pagedData = GetPagedData(player);
     if (pagedData.type == GossipSupport::PAGED_DATA_TYPE_MYTHIC_NPC_MENU)
     {
-        if (action == 1)
+        if (action == 1 || action == 0)
         {
-            AddMythicPlusLevels(player, creature);
-            return AddPagedData(player, creature, 0);
+            // 显示当前等级，不做操作，只刷新菜单
+            return OnGossipHello(player, creature);
         }
         else if (action == 2)
         {
-            if (sMythicPlus->SetCurrentMythicPlusLevel(player, 0))
+            // 重置等级为1
+            if (sMythicPlus->ResetMythicLevel(player))
             {
-                MythicPlus::BroadcastToPlayer(player, "你的史诗钥石等级已被重置！");
-                MythicPlus::Utils::VisualFeedback(player);
+                CloseGossipMenuFor(player);
+                return true;
             }
             else
-                MythicPlus::BroadcastToPlayer(player, "在队伍中无法重置史诗钥石等级。");
-
-            CloseGossipMenuFor(player);
-            return true;
+            {
+                MythicPlus::BroadcastToPlayer(player, "重置失败。");
+                CloseGossipMenuFor(player);
+                return true;
+            }
         }
-        else if (action == 3 || action == 4 || action == 6 || action == 0)
+        else if (action == 3 || action == 5)
             return OnGossipHello(player, creature);
-        else if (action == 5)
+        else if (action == 4)
         {
             AddMythicPlusDungeonList(player, creature);
             return AddPagedData(player, creature, 0);
         }
-        else if (action == 7)
+        else if (action == 6)
         {
             AddMythicPlusAllLevels(player, creature);
             return AddPagedData(player, creature, 0);
         }
-        else if (action == 8)
+        else if (action == 7)
         {
             if (sMythicPlus->GiveKeystone(player))
             {
@@ -720,12 +714,12 @@ bool MythicPlusNpcSupport::TakePagedDataAction(Player* player, Creature* creatur
             else
                 return OnGossipHello(player, creature);
         }
-        else if (action == 9)
+        else if (action == 8)
         {
             AddRandomAfixes(player, creature);
             return AddPagedData(player, creature, 0);
         }
-        else if (action == 10)
+        else if (action == 9)
         {
             CloseGossipMenuFor(player);
             return true;

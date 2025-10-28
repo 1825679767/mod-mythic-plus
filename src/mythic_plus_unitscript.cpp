@@ -107,6 +107,24 @@ public:
                         {
                             rewarded = true;
                             sMythicPlus->Reward(player, mapData->mythicLevel->reward);
+
+                            // 成功完成副本，自动升级等级
+                            // 获取队长（因为等级是基于队长的）
+                            Group* group = player->GetGroup();
+                            if (group)
+                            {
+                                ObjectGuid leaderGuid = group->GetLeaderGUID();
+                                Player* leader = ObjectAccessor::FindConnectedPlayer(leaderGuid);
+                                if (leader)
+                                {
+                                    sMythicPlus->UpgradeMythicLevel(leader);
+                                }
+                            }
+                            else
+                            {
+                                // 如果没有队伍，升级玩家自己的等级
+                                sMythicPlus->UpgradeMythicLevel(player);
+                            }
                         }
                         mapData->done = true;
 
