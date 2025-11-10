@@ -39,8 +39,24 @@ public:
                             MythicPlus::BroadcastToPlayer(player, "该副本已标记为非史诗钥石，无法再使用钥石。");
                         else
                         {
-                            if (player->IsInCombat())
-                                MythicPlus::BroadcastToPlayer(player, "战斗中无法使用史诗钥石。");
+                            // 检查队伍中所有成员是否在战斗中
+                            Group* group = player->GetGroup();
+                            bool anyInCombat = false;
+                            if (group)
+                            {
+                                for (Group::member_citerator mitr = group->GetMemberSlots().begin(); mitr != group->GetMemberSlots().end(); ++mitr)
+                                {
+                                    Player* member = ObjectAccessor::FindConnectedPlayer(mitr->guid);
+                                    if (member && member->IsInCombat())
+                                    {
+                                        anyInCombat = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (anyInCombat)
+                                MythicPlus::BroadcastToPlayer(player, "队伍中有成员正在战斗，无法使用史诗钥石。");
                             else
                             {
                                 // every player in the group must be online and at max level

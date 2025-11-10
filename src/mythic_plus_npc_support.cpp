@@ -150,10 +150,12 @@ void MythicPlusNpcSupport::AddMythicPlusLevelInfo(Player* player, Creature* crea
 
     uint32 id = 0;
 
+    // 禁用手动设置等级功能，只允许通过完成副本升级
+    // 改为显示等级信息（只读）
     Identifier* idnt = new Identifier();
     idnt->id = ++id;
-    idnt->optionIcon = GOSSIP_ICON_BATTLE;
-    idnt->uiName = MythicPlus::Utils::Colored("点击选择钥石层数 " + Acore::ToString(mythicLevel), "0a4a0e");
+    idnt->optionIcon = GOSSIP_ICON_CHAT;
+    idnt->uiName = MythicPlus::Utils::Colored("史诗钥石层数 " + Acore::ToString(mythicLevel) + " 的详细信息", "0a4a0e");
     pagedData.data.push_back(idnt);
 
     const MythicLevel* level = sMythicPlus->GetMythicLevel(mythicLevel);
@@ -733,18 +735,14 @@ bool MythicPlusNpcSupport::TakePagedDataAction(Player* player, Creature* creatur
     else if (pagedData.type == GossipSupport::PAGED_DATA_TYPE_MYTHIC_LEVEL_INFO)
     {
         uint32 chosenMythicLevel = pagedData.GetCustomInfo<MythicPlusNpcPageInfo>()->mythicLevel;
+
+        // 禁用手动设置等级功能，只显示等级信息
+        // 玩家只能通过完成副本来升级
         if (action == 1)
         {
-            if (sMythicPlus->SetCurrentMythicPlusLevel(player, chosenMythicLevel))
-            {
-                MythicPlus::BroadcastToPlayer(player, "你的史诗钥石等级已设置为 " + Acore::ToString(chosenMythicLevel));
-                MythicPlus::Utils::VisualFeedback(player);
-            }
-            else
-                MythicPlus::BroadcastToPlayer(player, "在队伍中无法设置史诗钥石等级。");
-
-            CloseGossipMenuFor(player);
-            return true;
+            // 点击等级信息标题时，提示玩家只能通过完成副本升级
+            MythicPlus::BroadcastToPlayer(player, "史诗钥石等级只能通过完成副本挑战来提升，无法手动设置。");
+            return AddPagedData(player, creature, 0);
         }
         else
         {

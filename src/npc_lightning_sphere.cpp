@@ -34,6 +34,8 @@ public:
                     return;
 
                 MythicPlus::MapData* mapData = sMythicPlus->GetMapData(map, false);
+                if (!mapData)  // 检查空指针，避免崩溃
+                    return;
                 if (mapData->done)
                     return;
 

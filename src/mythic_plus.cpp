@@ -202,14 +202,14 @@ bool MythicPlus::IsMapInMythicPlus(Map* map) const
 void MythicPlus::LoadFromDB()
 {
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
-    trans->Append("DELETE FROM `mythic_plus_dungeon` WHERE `id` NOT IN (SELECT `id` FROM `instance`)");
-    trans->Append("DELETE FROM `mythic_plus_char_level` WHERE `guid` NOT IN (SELECT `guid` FROM `characters`)");
-    trans->Append("DELETE FROM `mythic_plus_keystone_timer` WHERE `guid` NOT IN (SELECT `guid` FROM `characters`)");
+    trans->Append("DELETE FROM `_WY神话_副本信息` WHERE `实例ID` NOT IN (SELECT `id` FROM `instance`)");
+    trans->Append("DELETE FROM `_WY神话_角色等级` WHERE `角色ID` NOT IN (SELECT `guid` FROM `characters`)");
+    trans->Append("DELETE FROM `_WY神话_钥石计时` WHERE `角色ID` NOT IN (SELECT `guid` FROM `characters`)");
     CharacterDatabase.DirectCommitTransaction(trans);
 
     WorldDatabaseTransaction wtrans = WorldDatabase.BeginTransaction();
-    wtrans->Append("DELETE FROM mythic_plus_level_rewards rw WHERE NOT EXISTS (SELECT 1 FROM mythic_plus_level l where l.lvl = rw.lvl)");
-    wtrans->Append("DELETE FROM mythic_plus_affix a WHERE NOT EXISTS (SELECT 1 FROM mythic_plus_level l where l.lvl = a.lvl)");
+    wtrans->Append("DELETE FROM _WY神话_等级奖励 rw WHERE NOT EXISTS (SELECT 1 FROM _WY神话_等级配置 l where l.等级 = rw.等级)");
+    wtrans->Append("DELETE FROM _WY神话_词缀配置 a WHERE NOT EXISTS (SELECT 1 FROM _WY神话_等级配置 l where l.等级 = a.等级)");
     WorldDatabase.DirectCommitTransaction(wtrans);
 
     LoadMythicPlusCapableDungeonsFromDB();
@@ -235,7 +235,7 @@ MythicPlus::MythicPlusDungeonInfo* MythicPlus::GetSavedDungeonInfo(uint32 instan
 
 void MythicPlus::SaveDungeonInfo(uint32 instanceId, uint32 mapId, uint32 timeLimit, uint64 startTime, uint32 mythicLevel, uint32 penaltyOnDeath, uint32 deaths, bool done, bool isMythic)
 {
-    CharacterDatabase.Execute("REPLACE INTO mythic_plus_dungeon (id, map, timelimit, starttime, mythiclevel, done, ismythic, penalty_on_death, deaths) VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {})",
+    CharacterDatabase.Execute("REPLACE INTO _WY神话_副本信息 (实例ID, 地图ID, 时间限制, 开始时间, 神话等级, 已完成, 是神话模式, 死亡惩罚, 死亡次数) VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {})",
         instanceId, mapId, timeLimit, startTime, mythicLevel, done, isMythic, penaltyOnDeath, deaths);
 
     MythicPlusDungeonInfo* dungeonInfo = GetSavedDungeonInfo(instanceId);
@@ -265,7 +265,7 @@ void MythicPlus::AddDungeonSnapshot(uint32 instanceId, uint32 mapId, Difficulty 
     uint64 snapTime, uint32 combatTime, uint32 timelimit, uint32 charGuid, std::string charName,
     uint32 mythicLevel, uint32 creatureEntry, bool isFinalBoss, bool rewarded, uint32 penaltyOnDeath, uint32 deaths, uint32 randomAffixCount)
 {
-    CharacterDatabase.Execute("INSERT INTO mythic_plus_dungeon_snapshot (id, map, mapdifficulty, starttime, snaptime, combattime, timelimit, char_guid, char_name, mythiclevel, creature_entry, creature_final_boss, rewarded, penalty_on_death, deaths, random_affix_count) VALUES "
+    CharacterDatabase.Execute("INSERT INTO _WY神话_副本快照 (实例ID, 地图ID, 地图难度, 开始时间, 快照时间, 战斗时间, 时间限制, 角色ID, 角色名称, 神话等级, 生物ID, 是最终首领, 已奖励, 死亡惩罚, 死亡次数, 随机词缀数量) VALUES "
         "({}, {}, {}, {}, {}, {}, {}, {}, \"{}\", {}, {}, {}, {}, {}, {}, {})", instanceId, mapId, mapDiff, startTime, snapTime, combatTime, timelimit, charGuid, charName, mythicLevel, creatureEntry, isFinalBoss, rewarded, penaltyOnDeath, deaths, randomAffixCount);
 }
 
@@ -290,7 +290,7 @@ void MythicPlus::LoadMythicPlusCapableDungeonsFromDB()
 {
     mythicPlusDungeons.clear();
 
-    QueryResult result = WorldDatabase.Query("SELECT map, mapdifficulty, final_boss_entry, dungeon_name FROM mythic_plus_capable_dungeon");
+    QueryResult result = WorldDatabase.Query("SELECT 地图ID, 地图难度, 最终首领ID, 副本名称 FROM _WY神话_可用副本");
     if (!result)
         return;
 
@@ -302,7 +302,7 @@ void MythicPlus::LoadMythicPlusCapableDungeonsFromDB()
         uint16 diff = fields[1].Get<uint16>();
         if (diff != DUNGEON_DIFFICULTY_NORMAL && diff != DUNGEON_DIFFICULTY_HEROIC)
         {
-            LOG_ERROR("sql.sql", "表 `mythic_plus_capable_dungeon` 的 mapdifficulty '{}' 无效，已忽略", diff);
+            LOG_ERROR("sql.sql", "表 `_WY神话_可用副本` 的 地图难度 '{}' 无效，已忽略", diff);
             continue;
         }
         uint32 finalBossEntry = fields[2].Get<uint32>();
@@ -322,7 +322,7 @@ void MythicPlus::LoadMythicPlusDungeonsFromDB()
 {
     mythicPlusDungeonInfo.clear();
 
-    QueryResult result = CharacterDatabase.Query("SELECT id, map, timelimit, starttime, mythiclevel, done, ismythic, penalty_on_death, deaths FROM mythic_plus_dungeon");
+    QueryResult result = CharacterDatabase.Query("SELECT 实例ID, 地图ID, 时间限制, 开始时间, 神话等级, 已完成, 是神话模式, 死亡惩罚, 死亡次数 FROM _WY神话_副本信息");
     if (!result)
         return;
 
@@ -359,7 +359,7 @@ void MythicPlus::LoadMythicPlusCharLevelsFromDB()
 {
     charMythicLevels.clear();
 
-    QueryResult result = CharacterDatabase.Query("SELECT guid, mythiclevel FROM mythic_plus_char_level");
+    QueryResult result = CharacterDatabase.Query("SELECT 角色ID, 神话等级 FROM _WY神话_角色等级");
     if (!result)
         return;
 
@@ -378,7 +378,7 @@ void MythicPlus::LoadMythicPlusKeystoneTimersFromDB()
 {
     charKeystoneBuyTimers.clear();
 
-    QueryResult result = CharacterDatabase.Query("SELECT guid, buytime FROM mythic_plus_keystone_timer");
+    QueryResult result = CharacterDatabase.Query("SELECT 角色ID, 购买时间 FROM _WY神话_钥石计时");
     if (!result)
         return;
 
@@ -397,7 +397,7 @@ void MythicPlus::LoadIgnoredEntriesForMultiplyAffixFromDB()
 {
     ignoredEntriesForMultiplyAffix.clear();
 
-    QueryResult result = WorldDatabase.Query("SELECT entry FROM mythic_plus_ignore_multiply_affix");
+    QueryResult result = WorldDatabase.Query("SELECT 生物ID FROM _WY神话_忽略复制");
     if (!result)
         return;
 
@@ -414,7 +414,7 @@ void MythicPlus::LoadScaleMapFromDB()
 {
     scaleMap.clear();
 
-    QueryResult result = WorldDatabase.Query("SELECT map, mapdifficulty, dmg_scale_trash, dmg_scale_boss FROM mythic_plus_map_scale");
+    QueryResult result = WorldDatabase.Query("SELECT 地图ID, 地图难度, 小怪伤害系数, 首领伤害系数 FROM _WY神话_地图缩放");
     if (!result)
         return;
 
@@ -440,23 +440,23 @@ void MythicPlus::LoadMythicPlusSnapshotsFromDB()
 {
     std::string query =
         "select "
-            "mpds.id, "
-            "mpds.starttime, "
-            "mpds.snaptime, "
-            "mpds.creature_entry, "
-            "mpds.map, "
-            "group_concat(mpds.char_name) players, "
-            "max(mpds.combattime) combattime, "
-            "max(mythiclevel) mythiclevel, "
-            "max(creature_final_boss) creature_final_boss, "
-            "max(rewarded) rewarded, "
-            "mpds.mapdifficulty, "
-            "mpds.timelimit, "
-            "max(mpds.penalty_on_death) penalty_on_death, "
-            "max(mpds.deaths) deaths, "
-            "max(random_affix_count) random_affix_count "
-        "from mythic_plus_dungeon_snapshot mpds "
-        "group by mpds.id, mpds.map, mpds.mapdifficulty, mpds.starttime, mpds.timelimit, mpds.snaptime, mpds.creature_entry";
+            "mpds.实例ID, "
+            "mpds.开始时间, "
+            "mpds.快照时间, "
+            "mpds.生物ID, "
+            "mpds.地图ID, "
+            "group_concat(mpds.角色名称) players, "
+            "max(mpds.战斗时间) combattime, "
+            "max(神话等级) mythiclevel, "
+            "max(是最终首领) creature_final_boss, "
+            "max(已奖励) rewarded, "
+            "mpds.地图难度, "
+            "mpds.时间限制, "
+            "max(mpds.死亡惩罚) penalty_on_death, "
+            "max(mpds.死亡次数) deaths, "
+            "max(随机词缀数量) random_affix_count "
+        "from _WY神话_副本快照 mpds "
+        "group by mpds.实例ID, mpds.地图ID, mpds.地图难度, mpds.开始时间, mpds.时间限制, mpds.快照时间, mpds.生物ID";
     _queryProcessor.AddCallback(CharacterDatabase.AsyncQuery(query).WithCallback(std::bind(&MythicPlus::MythicPlusSnapshotsDBCallback, this, std::placeholders::_1)));
 }
 
@@ -464,7 +464,7 @@ void MythicPlus::LoadMythicAffixFromDB()
 {
     affixesFromDB.clear();
 
-    QueryResult result = WorldDatabase.Query("SELECT lvl, affixtype, val1, val2 FROM mythic_plus_affix");
+    QueryResult result = WorldDatabase.Query("SELECT 等级, 词缀类型, 参数1, 参数2 FROM _WY神话_词缀配置");
     if (!result)
         return;
 
@@ -475,7 +475,7 @@ void MythicPlus::LoadMythicAffixFromDB()
         uint16 affixType = fields[1].Get<uint16>();
         if (affixType >= MAX_AFFIX_TYPE)
         {
-            LOG_ERROR("sql.sql", "表 `mythic_plus_affix` 的 affix type '{}' 无效，已忽略", affixType);
+            LOG_ERROR("sql.sql", "表 `_WY神话_词缀配置` 的 词缀类型 '{}' 无效，已忽略", affixType);
             continue;
         }
         float val1 = fields[2].Get<float>();
@@ -488,7 +488,7 @@ void MythicPlus::LoadMythicRewardsFromDB()
 {
     rewardsFromDB.clear();
 
-    QueryResult result = WorldDatabase.Query("SELECT lvl, rewardtype, val1, val2 FROM mythic_plus_level_rewards");
+    QueryResult result = WorldDatabase.Query("SELECT 等级, 奖励类型, 参数1, 参数2 FROM _WY神话_等级奖励");
     if (!result)
         return;
 
@@ -499,7 +499,7 @@ void MythicPlus::LoadMythicRewardsFromDB()
         uint16 rewardType = fields[1].Get<uint16>();
         if (rewardType >= DBReward::MAX_REWARD_TYPE)
         {
-            LOG_ERROR("sql.sql", "表 `mythic_plus_level_rewards` 的 rewardtype '{}' 无效，已忽略", rewardType);
+            LOG_ERROR("sql.sql", "表 `_WY神话_等级奖励` 的 奖励类型 '{}' 无效，已忽略", rewardType);
             continue;
         }
         uint32 val1 = fields[2].Get<uint32>();
@@ -512,7 +512,7 @@ void MythicPlus::LoadMythicLevelsFromDB()
 {
     mythicLevels.clear();
 
-    QueryResult result = WorldDatabase.Query("SELECT lvl, timelimit, random_affix_count FROM mythic_plus_level order by lvl");
+    QueryResult result = WorldDatabase.Query("SELECT 等级, 时间限制, 随机词缀数量 FROM _WY神话_等级配置 order by 等级");
     if (!result)
         return;
 
@@ -567,7 +567,7 @@ void MythicPlus::LoadSpellOverridesFromDB()
 {
     spellOverrides.clear();
 
-    QueryResult result = WorldDatabase.Query("SELECT spellid, map, modpct, dotmodpct FROM mythic_plus_spell_override");
+    QueryResult result = WorldDatabase.Query("SELECT 法术ID, 地图ID, 伤害系数, 持续伤害系数 FROM _WY神话_法术调整");
     if (!result)
         return;
 
@@ -819,7 +819,7 @@ void MythicPlus::RemoveDungeonInfo(uint32 instanceId)
     if (itr != mythicPlusDungeonInfo.end())
     {
         mythicPlusDungeonInfo.erase(itr);
-        CharacterDatabase.Execute("DELETE FROM mythic_plus_dungeon WHERE id = {}", instanceId);
+        CharacterDatabase.Execute("DELETE FROM _WY神话_副本信息 WHERE 实例ID = {}", instanceId);
     }
 }
 
@@ -844,7 +844,7 @@ bool MythicPlus::SetCurrentMythicPlusLevel(const Player* player, uint32 mythicle
         uint32 guid = Utils::PlayerGUID(player);
         uint64 now = Utils::GameTimeCount();
         charMythicLevels[guid] = mythiclevel;
-        CharacterDatabase.Execute("REPLACE INTO mythic_plus_char_level (guid, mythiclevel, last_upgrade_time) VALUES ({}, {}, {})", guid, mythiclevel, now);
+        CharacterDatabase.Execute("REPLACE INTO _WY神话_角色等级 (角色ID, 神话等级, 上次升级时间) VALUES ({}, {}, {})", guid, mythiclevel, now);
         return true;
     }
 
@@ -927,7 +927,7 @@ void MythicPlus::CheckAndResetExpiredLevels()
     LOG_INFO("module", "史诗钥石系统：开始全局重置所有玩家等级...");
 
     // 重置所有玩家的等级为1
-    CharacterDatabase.Execute("UPDATE mythic_plus_char_level SET mythiclevel = 1, last_upgrade_time = {} WHERE mythiclevel > 1", now);
+    CharacterDatabase.Execute("UPDATE _WY神话_角色等级 SET 神话等级 = 1, 上次升级时间 = {} WHERE 神话等级 > 1", now);
 
     // 更新内存中的数据
     for (auto& pair : charMythicLevels)
@@ -956,7 +956,7 @@ void MythicPlus::CheckAndResetExpiredLevels()
 
 void MythicPlus::LoadGlobalResetTimeFromDB()
 {
-    QueryResult result = WorldDatabase.Query("SELECT last_reset_time FROM mythic_plus_global_reset WHERE id = 1");
+    QueryResult result = WorldDatabase.Query("SELECT 上次重置时间 FROM _WY神话_全局重置 WHERE 记录ID = 1");
     if (result)
     {
         Field* fields = result->Fetch();
@@ -967,14 +967,14 @@ void MythicPlus::LoadGlobalResetTimeFromDB()
     {
         // 如果没有记录，初始化为当前时间
         lastGlobalResetTime = Utils::GameTimeCount();
-        WorldDatabase.Execute("INSERT INTO mythic_plus_global_reset (id, last_reset_time) VALUES (1, {})", lastGlobalResetTime);
+        WorldDatabase.Execute("INSERT INTO _WY神话_全局重置 (记录ID, 上次重置时间) VALUES (1, {})", lastGlobalResetTime);
         LOG_INFO("module", "史诗钥石系统：初始化全局重置时间 = {}", lastGlobalResetTime);
     }
 }
 
 void MythicPlus::SaveGlobalResetTime()
 {
-    WorldDatabase.Execute("UPDATE mythic_plus_global_reset SET last_reset_time = {} WHERE id = 1", lastGlobalResetTime);
+    WorldDatabase.Execute("UPDATE _WY神话_全局重置 SET 上次重置时间 = {} WHERE 记录ID = 1", lastGlobalResetTime);
     LOG_INFO("module", "史诗钥石系统：保存全局重置时间 = {}", lastGlobalResetTime);
 }
 
@@ -1154,7 +1154,7 @@ bool MythicPlus::GiveKeystone(Player* player)
     }
 
     charKeystoneBuyTimers[Utils::PlayerGUID(player)] = now;
-    CharacterDatabase.Execute("REPLACE INTO mythic_plus_keystone_timer (guid, buytime) VALUES ({}, {})", Utils::PlayerGUID(player), now);
+    CharacterDatabase.Execute("REPLACE INTO _WY神话_钥石计时 (角色ID, 购买时间) VALUES ({}, {})", Utils::PlayerGUID(player), now);
 
     return true;
 }
@@ -1193,11 +1193,11 @@ void MythicPlus::ScaleCreature(Creature* creature)
         creatureData->extraDamageMultiplier = boss ? mapScale->bossDmgScale : mapScale->trashDmgScale;
 
     // only scale creatures from lower level dungeons
-    if (creature->GetLevel() >= DEFAULT_MAX_LEVEL)
+    if (creature->GetLevel() >= requiredPlayerLevel)
         return;
 
-    // assume level 82 for bosses and level [80, 81] for trash mobs
-    uint8 chosenLevel = boss ? 82 : urand(80, 81);
+    // 基于配置的等级动态计算：Boss 为配置等级+2，小怪为配置等级到配置等级+1
+    uint8 chosenLevel = boss ? (requiredPlayerLevel + 2) : urand(requiredPlayerLevel, requiredPlayerLevel + 1);
 
     CreatureTemplate const* cInfo = sObjectMgr->GetCreatureTemplate(creature->GetEntry());
     ASSERT(cInfo);

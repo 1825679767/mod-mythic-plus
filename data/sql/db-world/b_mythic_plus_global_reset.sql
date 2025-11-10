@@ -1,10 +1,10 @@
 -- 存储全局重置时间的表
-DROP TABLE IF EXISTS `mythic_plus_global_reset`;
-CREATE TABLE `mythic_plus_global_reset`(
-	`id` int unsigned NOT NULL DEFAULT 1,
-	`last_reset_time` BIGINT UNSIGNED NOT NULL DEFAULT 0,
-	PRIMARY KEY (`id`)
+DROP TABLE IF EXISTS `_WY神话_全局重置`;
+CREATE TABLE `_WY神话_全局重置`(
+	`记录ID` int unsigned NOT NULL DEFAULT 1,
+	`上次重置时间` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+	PRIMARY KEY (`记录ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 初始化记录（使用当前时间）
-INSERT INTO `mythic_plus_global_reset` (`id`, `last_reset_time`) VALUES (1, UNIX_TIMESTAMP());
+INSERT INTO `_WY神话_全局重置` (`记录ID`, `上次重置时间`) VALUES (1, UNIX_TIMESTAMP());

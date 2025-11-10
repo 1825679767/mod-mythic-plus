@@ -64,9 +64,11 @@ public:
                 if (mythicLevel == nullptr)
                     return;
 
-                if (player->GetLevel() < DEFAULT_MAX_LEVEL)
+                if (player->GetLevel() < sMythicPlus->GetRequiredPlayerLevel())
                 {
-                    MythicPlus::BroadcastToPlayer(player, "加入史诗钥石副本需要达到最高等级。");
+                    std::ostringstream errMsg;
+                    errMsg << "加入史诗钥石副本需要达到 " << sMythicPlus->GetRequiredPlayerLevel() << " 级。";
+                    MythicPlus::BroadcastToPlayer(player, errMsg.str());
                     MythicPlus::FallbackTeleport(player);
                     return;
                 }
@@ -180,6 +182,9 @@ public:
                         if (dsave != nullptr)
                         {
                             // at this point there shouldn't be any dungeon save available, it pretty much means the dungeon is saved as non M+
+                            MythicPlus::AnnounceToMap(map, "检测到副本已有进度记录，史诗钥石无法启动。");
+                            mapData->keystoneTimer = 0;  // 重置钥石计时器
+                            instanceTimer.erase(instanceId);  // 清理实例计时器
                             return;
                         }
 
@@ -203,6 +208,16 @@ public:
                         mapData->deaths = 0;
                         mapData->penaltyOnDeath = sMythicPlus->GetPenaltyOnDeath();
 
+                        // 向所有玩家显示史诗钥石等级和词缀信息
+                        Map::PlayerList const& playerList = map->GetPlayers();
+                        for (Map::PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                        {
+                            if (Player* player = itr->GetSource())
+                            {
+                                sMythicPlus->PrintMythicLevelInfo(mythicLevel, player);
+                            }
+                        }
+
                         if (mapData->penaltyOnDeath > 0)
                             sMythicPlus->BroadcastToMap(map, MythicPlus::Utils::RedColored("死亡将带来时间惩罚：" + secsToTimeString(mapData->penaltyOnDeath)));
                     }
@@ -215,7 +230,9 @@ public:
 
     void OnDestroyInstance(MapInstanced* /*mapInstanced*/, Map* map) override
     {
-        sMythicPlus->RemoveDungeonInfo(map->GetInstanceId());
+        uint32 instanceId = map->GetInstanceId();
+        instanceTimer.erase(instanceId);  // 清理副本计时器，避免内存泄漏
+        sMythicPlus->RemoveDungeonInfo(instanceId);
     }
 };
 

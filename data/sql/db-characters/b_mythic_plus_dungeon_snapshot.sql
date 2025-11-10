@@ -1,18 +1,19 @@
-DROP TABLE IF EXISTS `mythic_plus_dungeon_snapshot`;
-CREATE TABLE `mythic_plus_dungeon_snapshot`(
-	`id` int unsigned NOT NULL,
-	`map` smallint unsigned NOT NULL,
-	`mapdifficulty` smallint unsigned NOT NULL,
-	`starttime` bigint unsigned NOT NULL,
-	`snaptime` bigint unsigned NOT NULL,
-	`combattime` int unsigned NOT NULL,
-	`timelimit` int unsigned NOT NULL,
-	`char_guid` int unsigned NOT NULL,
-	`char_name` varchar(12) NOT NULL,
-	`mythiclevel` smallint unsigned NOT NULL,
-	`creature_entry` int unsigned NOT NULL,
-	`creature_final_boss` tinyint unsigned NOT NULL DEFAULT '0',
-	`rewarded` tinyint unsigned NOT NULL DEFAULT '0',
-	`penalty_on_death` int unsigned NOT NULL DEFAULT '0',
-	`deaths` int unsigned NOT NULL DEFAULT '0'
+DROP TABLE IF EXISTS `_WY神话_副本快照`;
+CREATE TABLE `_WY神话_副本快照`(
+	`实例ID` int unsigned NOT NULL,
+	`地图ID` smallint unsigned NOT NULL,
+	`地图难度` smallint unsigned NOT NULL,
+	`开始时间` bigint unsigned NOT NULL,
+	`快照时间` bigint unsigned NOT NULL,
+	`战斗时间` int unsigned NOT NULL,
+	`时间限制` int unsigned NOT NULL,
+	`角色ID` int unsigned NOT NULL,
+	`角色名称` varchar(12) NOT NULL,
+	`神话等级` smallint unsigned NOT NULL,
+	`生物ID` int unsigned NOT NULL,
+	`是最终首领` tinyint unsigned NOT NULL DEFAULT '0',
+	`已奖励` tinyint unsigned NOT NULL DEFAULT '0',
+	`死亡惩罚` int unsigned NOT NULL DEFAULT '0',
+	`死亡次数` int unsigned NOT NULL DEFAULT '0',
+	`随机词缀数量` int unsigned DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

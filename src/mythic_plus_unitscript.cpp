@@ -78,39 +78,27 @@ public:
 
             creatureData->engageTimer = 0;
 
-            const Map::PlayerList& playerList = map->GetPlayers();
-            for (Map::PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+            bool finalBoss = sMythicPlus->IsFinalBoss(creature->GetEntry());
+            bool rewarded = false;
+            MythicPlus::MapData* mapData = sMythicPlus->GetMapData(map, false);
+            ASSERT(mapData);
+
+            // 处理最终Boss击杀逻辑（只执行一次，避免重复升级）
+            if (finalBoss)
             {
-                if (Player* player = itr->GetSource())
+                if (mapData->receiveLoot)
                 {
-                    const std::string& cname = MythicPlus::Utils::GetCreatureName(player, creature);
-                    std::ostringstream oss;
-                    oss << cname << " 在 " << downAfterStr << " 内被击败。恭喜！";
-                    MythicPlus::AnnounceToPlayer(player, oss.str());
-                    MythicPlus::BroadcastToPlayer(player, oss.str());
+                    rewarded = true;
 
-                    bool finalBoss = sMythicPlus->IsFinalBoss(creature->GetEntry());
-                    bool rewarded = false;
-                    MythicPlus::MapData* mapData = sMythicPlus->GetMapData(map, false);
-                    ASSERT(mapData);
-
-                    if (finalBoss)
+                    // 成功完成副本，自动升级等级（只升级一次）
+                    // 获取队长（因为等级是基于队长的）
+                    const Map::PlayerList& playerList = map->GetPlayers();
+                    if (!playerList.IsEmpty())
                     {
-                        std::ostringstream oss2;
-                        oss2 << "史诗钥石副本已在 ";
-                        oss2 << secsToTimeString(gameTime - savedDungeon->startTime);
-                        oss2 << " 后结束。";
-                        MythicPlus::AnnounceToPlayer(player, oss2.str());
-                        MythicPlus::BroadcastToPlayer(player, oss2.str());
-
-                        if (mapData->receiveLoot)
+                        Player* firstPlayer = playerList.begin()->GetSource();
+                        if (firstPlayer)
                         {
-                            rewarded = true;
-                            sMythicPlus->Reward(player, mapData->mythicLevel->reward);
-
-                            // 成功完成副本，自动升级等级
-                            // 获取队长（因为等级是基于队长的）
-                            Group* group = player->GetGroup();
+                            Group* group = firstPlayer->GetGroup();
                             if (group)
                             {
                                 ObjectGuid leaderGuid = group->GetLeaderGUID();
@@ -123,12 +111,41 @@ public:
                             else
                             {
                                 // 如果没有队伍，升级玩家自己的等级
-                                sMythicPlus->UpgradeMythicLevel(player);
+                                sMythicPlus->UpgradeMythicLevel(firstPlayer);
                             }
                         }
-                        mapData->done = true;
+                    }
+                }
+                mapData->done = true;
 
-                        sMythicPlus->SaveDungeonInfo(map->GetInstanceId(), map->GetId(), mapData->timeLimit, mapData->mythicPlusStartTimer, mapData->mythicLevel->level, mapData->penaltyOnDeath, mapData->deaths, true);
+                sMythicPlus->SaveDungeonInfo(map->GetInstanceId(), map->GetId(), mapData->timeLimit, mapData->mythicPlusStartTimer, mapData->mythicLevel->level, mapData->penaltyOnDeath, mapData->deaths, true);
+            }
+
+            // 给每个玩家发放奖励和通知
+            const Map::PlayerList& playerList = map->GetPlayers();
+            for (Map::PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+            {
+                if (Player* player = itr->GetSource())
+                {
+                    const std::string& cname = MythicPlus::Utils::GetCreatureName(player, creature);
+                    std::ostringstream oss;
+                    oss << cname << " 在 " << downAfterStr << " 内被击败。恭喜！";
+                    MythicPlus::AnnounceToPlayer(player, oss.str());
+                    MythicPlus::BroadcastToPlayer(player, oss.str());
+
+                    if (finalBoss)
+                    {
+                        std::ostringstream oss2;
+                        oss2 << "史诗钥石副本已在 ";
+                        oss2 << secsToTimeString(gameTime - savedDungeon->startTime);
+                        oss2 << " 后结束。";
+                        MythicPlus::AnnounceToPlayer(player, oss2.str());
+                        MythicPlus::BroadcastToPlayer(player, oss2.str());
+
+                        if (mapData->receiveLoot)
+                        {
+                            sMythicPlus->Reward(player, mapData->mythicLevel->reward);
+                        }
                     }
 
                     const MythicLevel* mythicLevel = sMythicPlus->GetMythicLevel(savedDungeon->mythicLevel);

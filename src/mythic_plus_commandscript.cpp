@@ -52,7 +52,7 @@ private:
         sMythicPlus->LoadIgnoredEntriesForMultiplyAffixFromDB();
         sMythicPlus->LoadScaleMapFromDB();
         sMythicPlus->LoadSpellOverridesFromDB();
-        handler->SendGlobalGMSysMessage("已处理支持热重载的数据表：mythic_plus_ignore_multiply_affix、mythic_plus_map_scale、mythic_plus_spell_override");
+        handler->SendGlobalGMSysMessage("已处理支持热重载的数据表：_WY神话_忽略复制、_WY神话_地图缩放、_WY神话_法术调整");
 
         return true;
     }

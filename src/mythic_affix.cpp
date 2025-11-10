@@ -230,6 +230,8 @@ void LightningSphereAffix::HandlePeriodicEffectMap(Map* map, uint32 diff)
         if (roll_chance_f(chanceOfSpawn))
         {
             MythicPlus::MapData* mapData = sMythicPlus->GetMapData(map, false);
+            if (!mapData)  // 检查空指针，避免崩溃
+                return;
             // don't try to spawn spheres if the dungeon is finished
             if (mapData->done)
                 return;

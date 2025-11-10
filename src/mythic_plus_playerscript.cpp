@@ -31,13 +31,18 @@ public:
         if (playerMplusLevel > 0 && !sMythicPlus->GetMythicLevel(playerMplusLevel))
             sMythicPlus->SetCurrentMythicPlusLevel(player, 1, true); // force reset the level to 1
 
-        Group* group = player->GetGroup();
-        if (group != nullptr)
+        // 只有在可以进行史诗钥石的副本中才提示队长等级
+        Map* map = player->GetMap();
+        if (map && sMythicPlus->CanMapBeMythicPlus(map))
         {
-            ObjectGuid leaderGuid = group->GetLeaderGUID();
-            uint32 mplusLevel = sMythicPlus->GetCurrentMythicPlusLevelForGUID(leaderGuid.GetCounter());
-            if (mplusLevel > 0)
-                MythicPlus::BroadcastToPlayer(player, "你的队长（可能就是你）当前的史诗钥石等级为 " + Acore::ToString(mplusLevel) + " 级。队长可以使用史诗钥石开启挑战！");
+            Group* group = player->GetGroup();
+            if (group != nullptr)
+            {
+                ObjectGuid leaderGuid = group->GetLeaderGUID();
+                uint32 mplusLevel = sMythicPlus->GetCurrentMythicPlusLevelForGUID(leaderGuid.GetCounter());
+                if (mplusLevel > 0)
+                    MythicPlus::BroadcastToPlayer(player, "你的队长（可能就是你）当前的史诗钥石等级为 " + Acore::ToString(mplusLevel) + " 级。队长可以使用史诗钥石开启挑战！");
+            }
         }
     }
 
